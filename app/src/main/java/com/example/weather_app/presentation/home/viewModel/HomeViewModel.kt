@@ -16,36 +16,49 @@ import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.launch
 import kotlin.math.log
 
-class HomeViewModel(context:Context): ViewModel(){
-    private val weatherRepo:WeatherRepo=WeatherRepo(context)
-    val weatherResponse: MutableState<WeatherResponse?> = mutableStateOf(null)
-    val error: MutableState<String> = mutableStateOf("")
-    val isLoading:MutableState<Boolean> =mutableStateOf(false)
-    val locationProvider:LocationProvider=LocationProvider(context)
-    var latLong: LatLng = LatLng(0.0, 0.0)
+class HomeViewModel(context: Context) : ViewModel() {
+
+    private val weatherRepo: WeatherRepo = WeatherRepo(context)
+    private val locationProvider: LocationProvider = LocationProvider(context)
+
+    var uiState = mutableStateOf<HomeUiState>(HomeUiState.Loading)
+        private set
+
+    private var latLong: LatLng = LatLng(0.0, 0.0)
 
     init {
         viewModelScope.launch {
             val location = locationProvider.getDeviceLocation()
+
             if (location != null) {
                 latLong = location
-                Log.i("Location", ": "+latLong.latitude+"   "+latLong.longitude)
+                Log.i("Location", "${latLong.latitude}  ${latLong.longitude}")
                 getWeather()
             } else {
+                uiState.value = HomeUiState.Error("Location not available")
             }
         }
     }
-    fun getWeather(){
-        isLoading.value=true
+
+    fun getWeather() {
+        uiState.value = HomeUiState.Loading
+
         viewModelScope.launch {
             try {
-              val data=  weatherRepo.getWeather(latLong.latitude,latLong.longitude,Constants.apiKey,)
-                weatherResponse.value=data
-                Log.i("Data", "getWeather: "+data)
-            }catch (e:Exception){
-                error.value=e.message?:""
+                val data = weatherRepo.getWeather(
+                    latLong.latitude,
+                    latLong.longitude,
+                    Constants.apiKey
+                )
+
+                Log.i("Data", "$data")
+
+                uiState.value = HomeUiState.Success(data)
+
+            } catch (e: Exception) {
+                uiState.value =
+                    HomeUiState.Error(e.message ?: "Unknown error")
             }
-            isLoading.value=false
         }
     }
 }
