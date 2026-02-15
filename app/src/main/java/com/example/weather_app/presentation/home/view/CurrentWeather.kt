@@ -1,9 +1,11 @@
 package com.example.weather_app.presentation.home.view
 
+import WeatherIcon
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,7 +23,8 @@ fun CurrentWeather(
     temperature: Int,
     condition: String,
     feelsLike: Int,
-    timestamp: Long
+    timestamp: Long,
+    icon:String
 ) {
     val dateFormat = SimpleDateFormat("EEE, MMM dd • hh:mm a", Locale.getDefault())
     val formattedDate = dateFormat.format(Date(timestamp * 1000))
@@ -30,7 +33,7 @@ fun CurrentWeather(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        WeatherIcon(condition = condition)
+        WeatherIcon(iconCode=icon, modifier = Modifier.size(120.dp))
 
         Spacer(modifier = Modifier.height(16.dp))
 

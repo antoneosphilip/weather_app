@@ -24,7 +24,7 @@ fun BottomNavigationBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(30.dp)),
-            containerColor = Color(0xFF1C1C2E),
+            containerColor = MaterialTheme.colorScheme.primary,
             tonalElevation = 0.dp
         ) {
             bottomNavItems.forEach { item ->

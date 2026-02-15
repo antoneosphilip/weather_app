@@ -45,17 +45,28 @@ class HomeViewModel(context: Context) : ViewModel() {
 
         viewModelScope.launch {
             try {
-                val data = weatherRepo.getWeather(
-                    latLong.latitude,
-                    latLong.longitude,
+                val weather = weatherRepo.getWeather(
+                    lat= latLong.latitude,
+                    lon= latLong.longitude,
                     Constants.apiKey
                 )
+                val hourlyForecast=weatherRepo.getHourlyForecast(
+                    lat = latLong.latitude,
+                    lon = latLong.longitude,
+                    Constants.apiKey,
+                )
+                val dailyForecast=weatherRepo.getDailyForecast(
+                    lat = latLong.latitude,
+                    lon = latLong.longitude,
+                    Constants.apiKey,
+                )
 
-                Log.i("Data", "$data")
+                Log.i("Data", "${weather}")
 
-                uiState.value = HomeUiState.Success(data)
+                uiState.value = HomeUiState.Success(weather,hourlyForecast,dailyForecast)
 
             } catch (e: Exception) {
+                Log.i("Errorrr", "getWeather: "+e.message)
                 uiState.value =
                     HomeUiState.Error(e.message ?: "Unknown error")
             }
