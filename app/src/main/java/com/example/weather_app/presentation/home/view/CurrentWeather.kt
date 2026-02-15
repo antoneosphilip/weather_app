@@ -24,7 +24,9 @@ fun CurrentWeather(
     condition: String,
     feelsLike: Int,
     timestamp: Long,
-    icon:String
+    icon:String,
+    unit:String
+
 ) {
     val dateFormat = SimpleDateFormat("EEE, MMM dd • hh:mm a", Locale.getDefault())
     val formattedDate = dateFormat.format(Date(timestamp * 1000))
@@ -38,11 +40,12 @@ fun CurrentWeather(
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "$temperature°C",
+            text = "$temperature°$unit",
             color = Color.White,
             fontSize = 40.sp,
             fontWeight = FontWeight.Bold
         )
+        Spacer(modifier = Modifier.height(8.dp))
 
         Text(
             text = condition.replaceFirstChar { it.titlecase() },
@@ -54,7 +57,7 @@ fun CurrentWeather(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Feels Like: $feelsLike°C",
+            text = "Feels Like: $feelsLike°$unit",
             color = Color.White.copy(alpha = 0.7f),
             fontSize = 14.sp
         )
