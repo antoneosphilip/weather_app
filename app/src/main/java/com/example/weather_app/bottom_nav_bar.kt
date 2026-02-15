@@ -19,7 +19,6 @@ fun BottomNavigationBar(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 8.dp)
     ) {
         NavigationBar(
             modifier = Modifier

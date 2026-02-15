@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import com.example.weather_app.presentation.home.view.HomeScreen
 import kotlinx.serialization.Serializable
 
 sealed class Screens{
@@ -19,7 +19,7 @@ sealed class Screens{
 }
 
 @Composable
-fun MyApp(nav: NavHostController) {
+fun MyApp(nav: NavHostController,) {
     NavHost(
         nav,
        // modifier = Modifier,
