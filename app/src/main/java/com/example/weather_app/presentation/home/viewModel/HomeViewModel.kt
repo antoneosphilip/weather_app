@@ -10,22 +10,18 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.weather_app.constant.Constants
-import com.example.weather_app.data.weather.model.DailyForecastResponse
-import com.example.weather_app.data.weather.model.Weather
-import com.example.weather_app.data.weather.model.WeatherForecastResponse
-import com.example.weather_app.data.weather.model.WeatherResponse
 import com.example.weather_app.data.weather.repo.WeatherRepo
+import com.example.weather_app.prefs.SharedPreferencesHelper
 import com.example.weather_app.presentation.setting.viewModel.SettingViewModel
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
-import kotlin.math.log
 
 @Suppress("UNREACHABLE_CODE")
-class HomeViewModel(private val context: Context,
-                    private val settingViewModel: SettingViewModel
-    ) : ViewModel() {
+class HomeViewModel(
+    private val context: Context,
+    private val settingViewModel: SettingViewModel
+) : ViewModel() {
 
     private val weatherRepo: WeatherRepo = WeatherRepo(context)
     val locationProvider: LocationProvider = LocationProvider(context)
@@ -39,10 +35,15 @@ class HomeViewModel(private val context: Context,
     var needsLocationSettings = mutableStateOf<IntentSenderRequest?>(null)
         private set
 
-    private var latLong: LatLng? = null
+    var shouldNavigateToMap = mutableStateOf(false)
+        private set
+
+    var latLong: LatLng? = null
+        private set
 
     init {
         loadWeatherData()
+
         viewModelScope.launch {
             settingViewModel.selectedLanguage.collect { _ ->
                 refreshWeatherData()
@@ -54,19 +55,27 @@ class HomeViewModel(private val context: Context,
                 refreshWeatherData()
             }
         }
+        viewModelScope.launch {
+            settingViewModel.selectedLocation.collect { locationMode ->
+                if (locationMode == "Manual") {
+                    shouldNavigateToMap.value = true
+
+                }
+            }
+        }
     }
+
     private fun refreshWeatherData() {
         latLong?.let { location ->
             viewModelScope.launch {
                 try {
                     Log.d("HomeViewModel", "Refreshing weather data...")
-                    val (weather, hourly, daily) = getAllWeatherData(
+                    getAllWeatherData(
                         location.latitude,
                         location.longitude,
                         lan = settingViewModel.getLanguageCode(),
                         unit = settingViewModel.getTemperatureUnit()
                     )
-                    uiState.value = HomeUiState.Success(weather, hourly, daily)
                 } catch (e: Exception) {
                     Log.e("HomeViewModel", "Error: ${e.message}", e)
                     uiState.value = HomeUiState.Error(e.message ?: "Unknown error")
@@ -75,20 +84,45 @@ class HomeViewModel(private val context: Context,
         }
     }
 
-     fun getTemperatureUnit():String{
-        if(settingViewModel.getTemperatureUnit()=="metric"){
-            return "C"
-        }
-        else if(settingViewModel.getTemperatureUnit()=="standard"){
-            return "K"
-        }
-        else{
-            return  "F"
+    fun getTemperatureUnit(): String {
+        return when (settingViewModel.getTemperatureUnit()) {
+            "metric" -> "C"
+            "standard" -> "K"
+            else -> "F"
         }
     }
 
+    fun getCurrentLocation(): LatLng? = latLong
+
+    fun updateLocationFromMap(latitude: Double, longitude: Double) {
+        latLong = LatLng(latitude, longitude)
+        shouldNavigateToMap.value = false
+        viewModelScope.launch {
+            try {
+                uiState.value = HomeUiState.Loading
+                getAllWeatherData(
+                    latitude,
+                    longitude,
+                    lan = settingViewModel.getLanguageCode(),
+                    unit = settingViewModel.getTemperatureUnit()
+                )
+            } catch (e: Exception) {
+                Log.e("HomeViewModel", "Error: ${e.message}", e)
+                uiState.value = HomeUiState.Error(e.message ?: "Unknown error")
+            }
+        }
+    }
+
+    fun onMapNavigationHandled() {
+        shouldNavigateToMap.value = false
+    }
 
     fun loadWeatherData() {
+        if (settingViewModel.selectedLocation.value == "Manual" && latLong == null) {
+            shouldNavigateToMap.value = true
+            return
+        }
+
         uiState.value = HomeUiState.Loading
         needsPermissionRequest.value = false
         needsLocationSettings.value = null
@@ -126,13 +160,12 @@ class HomeViewModel(private val context: Context,
                 latLong = location
                 Log.i("Location", "Lat: ${location.latitude}, Lon: ${location.longitude}")
 
-                val (weather, hourly, daily) = getAllWeatherData(
+                getAllWeatherData(
                     location.latitude,
                     location.longitude,
-
-                    )
-
-                uiState.value = HomeUiState.Success(weather, hourly, daily)
+                    lan = SharedPreferencesHelper.getInstance(context).getString("language"),
+                    unit = SharedPreferencesHelper.getInstance(context).getString("temperature")
+                )
 
             } catch (e: Exception) {
                 Log.e("HomeViewModel", "Error: ${e.message}", e)
@@ -140,16 +173,17 @@ class HomeViewModel(private val context: Context,
             }
         }
     }
-    suspend fun getAllWeatherData(lat: Double, lon: Double,lan:String="en",unit:String="metric"):
-            Triple<WeatherResponse, WeatherForecastResponse, DailyForecastResponse> {
+
+    private fun getAllWeatherData(lat: Double, lon: Double, lan: String = "en", unit: String = "metric") {
         Log.i("Get Data", "getAllWeatherData: ")
-        val weather = weatherRepo.getWeather(lat, lon, Constants.apiKey,lan,unit)
-        val hourlyForecast = weatherRepo.getHourlyForecast(lat, lon, Constants.apiKey,lan,unit)
-        val dailyForecast = weatherRepo.getDailyForecast(lat, lon, Constants.apiKey,lan,unit)
+        viewModelScope.launch {
+            val weather = weatherRepo.getWeather(lat, lon, Constants.apiKey, lan, unit)
+            val hourlyForecast = weatherRepo.getHourlyForecast(lat, lon, Constants.apiKey, lan, unit)
+            val dailyForecast = weatherRepo.getDailyForecast(lat, lon, Constants.apiKey, lan, unit)
 
-        return Triple(weather, hourlyForecast, dailyForecast)
+            uiState.value = HomeUiState.Success(weather, hourlyForecast, dailyForecast)
+        }
     }
-
 
     fun onPermissionResult(granted: Boolean) {
         needsPermissionRequest.value = false
@@ -182,11 +216,14 @@ class HomeViewModel(private val context: Context,
     }
 }
 
-class HomeViewModelFactory(private val context: Context,private val viewModel: SettingViewModel) : ViewModelProvider.Factory {
+class HomeViewModelFactory(
+    private val context: Context,
+    private val viewModel: SettingViewModel
+) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(HomeViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return HomeViewModel(context,viewModel) as T
+            return HomeViewModel(context, viewModel) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

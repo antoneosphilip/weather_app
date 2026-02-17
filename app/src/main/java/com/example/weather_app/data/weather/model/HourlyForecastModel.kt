@@ -19,7 +19,7 @@ data class ForecastItem(
     val weather: List<Weather>,
     val clouds: Clouds,
     val wind: Wind,
-    val visibility: Int,
+    val visibility: Int?=null,
     val pop: Double,
     val sys: ForecastSys,
     @SerialName("dt_txt")

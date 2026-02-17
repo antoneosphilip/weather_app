@@ -7,6 +7,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -17,6 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import com.example.weather_app.Screens
 import com.example.weather_app.presentation.components.CustomLoading
 import com.example.weather_app.presentation.components.ErrorMessage
 import com.example.weather_app.presentation.home.viewModel.HomeUiState
@@ -28,10 +31,12 @@ import kotlin.math.roundToInt
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun HomeScreen(settingViewModel:SettingViewModel) {
+fun HomeScreen(
+    settingViewModel: SettingViewModel,
+    navController: NavController,
+    viewModel: HomeViewModel
+) {
     val context = LocalContext.current
-
-    val viewModel: HomeViewModel = viewModel(factory = HomeViewModelFactory(context,settingViewModel))
     val scrollState = rememberScrollState()
 
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -63,6 +68,14 @@ fun HomeScreen(settingViewModel:SettingViewModel) {
         }
     }
 
+    LaunchedEffect(viewModel.shouldNavigateToMap.value) {
+        if (viewModel.shouldNavigateToMap.value==true) {
+            navController.navigate(Screens.LocationScreen) {
+                launchSingleTop = true
+            }
+            viewModel.onMapNavigationHandled()
+        }
+    }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -96,14 +109,20 @@ fun HomeScreen(settingViewModel:SettingViewModel) {
 
                     Spacer(modifier = Modifier.height(32.dp))
 
-                    CurrentWeather(
-                        temperature = weather.main.temp.roundToInt(),
-                        icon = weather.weather.firstOrNull()?.icon ?: "",
-                        feelsLike = weather.main.feelsLike.roundToInt(),
-                        timestamp = weather.dt,
-                        condition = weather.weather.firstOrNull()?.description ?: "",
-                       unit=viewModel.getTemperatureUnit()
-                    )
+                    Row(
+                        modifier = Modifier.clickable {
+                            navController.navigate(Screens.LocationScreen)
+                        }
+                    ) {
+                        CurrentWeather(
+                            temperature = weather.main.temp.roundToInt(),
+                            icon = weather.weather.firstOrNull()?.icon ?: "",
+                            feelsLike = weather.main.feelsLike.roundToInt(),
+                            timestamp = weather.dt,
+                            condition = weather.weather.firstOrNull()?.description ?: "",
+                            unit = viewModel.getTemperatureUnit()
+                        )
+                    }
 
                     Spacer(modifier = Modifier.height(24.dp))
 
@@ -125,7 +144,6 @@ fun HomeScreen(settingViewModel:SettingViewModel) {
                     Spacer(modifier = Modifier.height(80.dp))
                 }
             }
-
         }
     }
 }
