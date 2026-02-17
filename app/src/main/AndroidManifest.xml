@@ -17,6 +17,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Weather_app"
         tools:targetApi="31">
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyD0m1J0p_wI8xp3BMdC0Ik0oWwQ0HP2Nbc"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"

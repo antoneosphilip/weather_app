@@ -9,9 +9,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.weather_app.presentation.home.view.HomeScreen
+import com.example.weather_app.presentation.home.view.LocationPickerScreen
+import com.example.weather_app.presentation.home.viewModel.HomeViewModel
+import com.example.weather_app.presentation.home.viewModel.HomeViewModelFactory
 import com.example.weather_app.presentation.setting.view.SettingsScreen
 import com.example.weather_app.presentation.setting.viewModel.SettingViewModel
 import com.example.weather_app.presentation.setting.viewModel.SettingViewModelFactory
+import com.google.android.gms.maps.model.LatLng
 import kotlinx.serialization.Serializable
 
 sealed class Screens{
@@ -23,6 +27,9 @@ sealed class Screens{
     object FavoriteScreen :Screens()
     @Serializable
     object SettingScreen :Screens()
+
+    @Serializable
+    object LocationScreen :Screens()
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -34,6 +41,10 @@ fun MyApp(nav: NavHostController,) {
         factory = SettingViewModelFactory(context)
     )
 
+    val homeViewModel: HomeViewModel = viewModel(
+        factory = HomeViewModelFactory(context,settingViewModel)
+    )
+
     NavHost(
         nav,
        // modifier = Modifier,
@@ -41,7 +52,7 @@ fun MyApp(nav: NavHostController,) {
     ) {
 
         composable<Screens.HomeScreen> {
-            HomeScreen(settingViewModel)
+            HomeScreen(settingViewModel,nav,homeViewModel)
         }
         composable<Screens.AlertScreen> {
             AlertsScreen(nav)
@@ -53,6 +64,18 @@ fun MyApp(nav: NavHostController,) {
         }
         composable<Screens.FavoriteScreen> {b->
             FavoritesScreen(nav)
+        }
+        composable<Screens.LocationScreen> {b->
+            LocationPickerScreen(
+                currentLocation = homeViewModel.latLong?.let { LatLng(it.latitude,
+                    it.longitude) },
+                onLocationSelected = { lat, lng ->
+                  homeViewModel.updateLocationFromMap(lat,lng)
+                },
+                onBack = {
+                    nav.popBackStack()
+                }
+                )
         }
 
 
