@@ -19,13 +19,12 @@ fun BottomNavigationBar(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 8.dp)
     ) {
         NavigationBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(30.dp)),
-            containerColor = Color(0xFF1C1C2E),
+            containerColor = MaterialTheme.colorScheme.primary,
             tonalElevation = 0.dp
         ) {
             bottomNavItems.forEach { item ->
