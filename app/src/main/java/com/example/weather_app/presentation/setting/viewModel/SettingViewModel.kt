@@ -4,76 +4,96 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.weather_app.prefs.SharedPreferencesHelper
+import androidx.lifecycle.viewModelScope
+import com.example.weather_app.data.weather.model.SettingModel
+import com.example.weather_app.data.WeatherRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-
+import kotlinx.coroutines.launch
 
 class SettingViewModel(context: Context) : ViewModel() {
 
-    private val prefsHelper = SharedPreferencesHelper.getInstance(context)
+    private val weatherRepo = WeatherRepo(context)
 
-    private val KEY_LANGUAGE = "language"
-    private val KEY_LOCATION = "location"
-    private val KEY_TEMPERATURE = "temperature"
-    private val KEY_WIND_SPEED = "wind_speed"
-
-    private val _selectedLanguage = MutableStateFlow(
-        prefsHelper.getString(KEY_LANGUAGE, "English")
-    )
+    private val _selectedLanguage = MutableStateFlow("English")
     val selectedLanguage = _selectedLanguage.asStateFlow()
 
-    private val _selectedLocation = MutableStateFlow(
-        prefsHelper.getString(KEY_LOCATION, "GPS")
-    )
+    private val _selectedLocation = MutableStateFlow("GPS")
     val selectedLocation = _selectedLocation.asStateFlow()
 
-    private val _selectedTemperature = MutableStateFlow(
-        prefsHelper.getString(KEY_TEMPERATURE, "Celsius (°C)")
-    )
+    private val _selectedTemperature = MutableStateFlow("Celsius (°C)")
     val selectedTemperature = _selectedTemperature.asStateFlow()
 
-    private val _selectedWindSpeed = MutableStateFlow(
-        prefsHelper.getString(KEY_WIND_SPEED, "Meter/Sec")
-    )
+    private val _selectedWindSpeed = MutableStateFlow("Meter/Sec")
     val selectedWindSpeed = _selectedWindSpeed.asStateFlow()
 
-    fun changeLanguage(value: String) {
-        Log.d("SettingViewModel", "Changing language from ${_selectedLanguage.value} to $value")
+    init {
+        viewModelScope.launch {
+            val settings = weatherRepo.getSetting()
+            if (settings != null) {
 
+                _selectedLanguage.value = when (settings.languageCode) {
+                    "ar" -> "Arabic"
+                    else -> "English"
+                }
+
+                _selectedTemperature.value = when (settings.temperatureUnit) {
+                    "imperial" -> "Fahrenheit (°F)"
+                    "standard" -> "Kelvin (K)"
+                    else -> "Celsius (°C)"
+                }
+                _selectedLocation.value = settings.location
+
+                _selectedWindSpeed.value = when (settings.windSpeedUnit) {
+                    "mile" -> "Mile/Hour"
+                    else -> "Meter/Sec"
+                }
+
+            }
+        }
+    }
+
+    fun changeLanguage(value: String) {
+        Log.d("SettingViewModel", "Changing language to $value")
         _selectedLanguage.value = value
-        prefsHelper.save(KEY_LANGUAGE, value)
+        saveSettings()
     }
 
     fun changeLocation(value: String) {
         _selectedLocation.value = value
-        prefsHelper.save(KEY_LOCATION, value)
+        saveSettings()
     }
 
     fun changeTemperature(value: String) {
         _selectedTemperature.value = value
-        prefsHelper.save(KEY_TEMPERATURE, value)
+        saveSettings()
     }
 
     fun changeWindSpeed(value: String) {
         _selectedWindSpeed.value = value
-        prefsHelper.save(KEY_WIND_SPEED, value)
+        saveSettings()
     }
 
-    fun getTemperatureUnit(): String {
-        return when (_selectedTemperature.value) {
-            "Celsius (°C)" -> "metric"
-            "Fahrenheit (°F)" -> "imperial"
-            "Kelvin (K)" -> "standard"
-            else -> "metric"
-        }
-    }
-
-    fun getLanguageCode(): String {
-        return when (_selectedLanguage.value) {
-            "English" -> "en"
-            "Arabic" -> "ar"
-            else -> "en"
+    private fun saveSettings() {
+        viewModelScope.launch {
+            weatherRepo.insertSetting(
+                SettingModel(
+                    location = _selectedLocation.value,
+                    languageCode = when (_selectedLanguage.value) {
+                        "Arabic" -> "ar"
+                        else -> "en"
+                    },
+                    temperatureUnit = when (_selectedTemperature.value) {
+                        "Fahrenheit (°F)" -> "imperial"
+                        "Kelvin (K)" -> "standard"
+                        else -> "metric"
+                    },
+                    windSpeedUnit = when (_selectedWindSpeed.value) {
+                        "Mile/Hour" -> "mile"
+                        else -> "meter"
+                    }
+                )
+            )
         }
     }
 }

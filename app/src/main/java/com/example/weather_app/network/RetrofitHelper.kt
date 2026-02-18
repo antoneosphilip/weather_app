@@ -1,6 +1,6 @@
 package com.example.weather_app.network
 
-import com.example.weather_app.data.weather.datasource.WeatherService
+import com.example.weather_app.data.weather.datasource.remote.WeatherService
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType

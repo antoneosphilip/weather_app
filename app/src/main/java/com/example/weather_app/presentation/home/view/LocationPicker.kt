@@ -1,34 +1,35 @@
 package com.example.weather_app.presentation.home.view
 
+import android.location.Geocoder
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.example.weather_app.ui.theme.primary
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
-
-
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-import com.example.weather_app.ui.theme.primary
-import com.example.weather_app.ui.theme.secondary
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LocationPickerScreen(
     currentLocation: LatLng?,
-    onLocationSelected: (Double, Double) -> Unit,
+    onLocationSelected: (Double, Double, String) -> Unit,
     onBack: () -> Unit
 ) {
+    val context = LocalContext.current
+
     var selectedPosition by remember {
         mutableStateOf(currentLocation ?: LatLng(30.0444, 31.2357))
     }
@@ -40,21 +41,37 @@ fun LocationPickerScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Select Location") },
+                title = { Text("Select Location", color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = "Back",
+                            tint = Color.White
                         )
                     }
                 },
                 actions = {
                     IconButton(
                         onClick = {
+                            val geocoder = Geocoder(context, Locale.getDefault())
+                            var address = ""
+                            try {
+                                val results = geocoder.getFromLocation(
+                                    selectedPosition.latitude,
+                                    selectedPosition.longitude,
+                                    1
+                                )
+                                if (!results.isNullOrEmpty()) {
+                                    address = results[0].getAddressLine(0) ?: ""
+                                }
+                            } catch (e: Exception) {
+                                address = ""
+                            }
                             onLocationSelected(
                                 selectedPosition.latitude,
-                                selectedPosition.longitude
+                                selectedPosition.longitude,
+                                address
                             )
                             onBack()
                         }
@@ -62,7 +79,7 @@ fun LocationPickerScreen(
                         Icon(
                             imageVector = Icons.Default.Check,
                             contentDescription = "Confirm",
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = Color.White
                         )
                     }
                 },
@@ -109,53 +126,6 @@ fun LocationPickerScreen(
                     title = "Selected Location",
                     snippet = "Lat: ${selectedPosition.latitude}, Lng: ${selectedPosition.longitude}"
                 )
-            }
-
-            Card(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 80.dp, start = 16.dp, end = 16.dp)
-                    .fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = secondary
-                )
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(
-                        text = "Selected Location:",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Latitude: ${String.format("%.6f", selectedPosition.latitude)}",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Text(
-                        text = "Longitude: ${String.format("%.6f", selectedPosition.longitude)}",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Button(
-                        onClick = {
-                            onLocationSelected(
-                                selectedPosition.latitude,
-                                selectedPosition.longitude
-                            )
-                            onBack()
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = primary
-                        )
-                    ) {
-                        Text("OK")
-                    }
-                }
             }
         }
     }

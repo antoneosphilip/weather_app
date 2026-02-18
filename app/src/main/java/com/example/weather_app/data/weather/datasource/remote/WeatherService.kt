@@ -1,4 +1,4 @@
-package com.example.weather_app.data.weather.datasource
+package com.example.weather_app.data.weather.datasource.remote
 
 import com.example.weather_app.data.weather.model.DailyForecastResponse
 import com.example.weather_app.data.weather.model.WeatherForecastResponse

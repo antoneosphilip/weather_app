@@ -8,6 +8,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.weather_app.data.favorite.model.LocationModel
+import com.example.weather_app.presentation.favorite.view.FavoritesScreen
+import com.example.weather_app.presentation.favorite.viewModel.FavoriteViewModel
+import com.example.weather_app.presentation.favorite.viewModel.FavoriteViewModelFactory
 import com.example.weather_app.presentation.home.view.HomeScreen
 import com.example.weather_app.presentation.home.view.LocationPickerScreen
 import com.example.weather_app.presentation.home.viewModel.HomeViewModel
@@ -45,6 +49,11 @@ fun MyApp(nav: NavHostController,) {
         factory = HomeViewModelFactory(context,settingViewModel)
     )
 
+    val favoriteViewModel: FavoriteViewModel = viewModel(
+        factory = FavoriteViewModelFactory(context)
+    )
+
+
     NavHost(
         nav,
        // modifier = Modifier,
@@ -69,8 +78,14 @@ fun MyApp(nav: NavHostController,) {
             LocationPickerScreen(
                 currentLocation = homeViewModel.latLong?.let { LatLng(it.latitude,
                     it.longitude) },
-                onLocationSelected = { lat, lng ->
-                  homeViewModel.updateLocationFromMap(lat,lng)
+                onLocationSelected = { lat, lng ,addreess->
+
+                  homeViewModel.getAllWeatherData(lat,lng)
+                    favoriteViewModel.saveLocation(LocationModel(
+                        lat=lat,
+                        long = lng,
+                        location = addreess,
+                    ))
                 },
                 onBack = {
                     nav.popBackStack()
