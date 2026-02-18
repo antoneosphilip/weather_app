@@ -37,8 +37,9 @@ fun SettingsScreen(viewModel: SettingViewModel) {
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
             color = Color.White,
-            modifier = Modifier.padding(bottom = 24.dp)
+            modifier = Modifier.padding(bottom = 24.dp, top = 24.dp)
         )
+        Spacer(modifier = Modifier.height(8.dp))
 
         SettingsSection(
             title = "Location Settings",

@@ -1,13 +1,12 @@
-package com.example.weather_app.data.weather.datasource
+package com.example.weather_app.data.weather.datasource.remote
 
 import com.example.weather_app.data.weather.model.DailyForecastResponse
 import com.example.weather_app.data.weather.model.WeatherForecastResponse
 import com.example.weather_app.data.weather.model.WeatherResponse
 import com.example.weather_app.network.RetrofitHelper
-import retrofit2.http.Query
 
 class WeatherRemoteDataSource{
-    private val weatherService:WeatherService=RetrofitHelper.retrofitService
+    private val weatherService: WeatherService =RetrofitHelper.retrofitService
     suspend fun getWeather(
          lat: Double,
         lon: Double,

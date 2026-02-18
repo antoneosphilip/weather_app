@@ -3,6 +3,7 @@ package com.example.weather_app.presentation.home.view
 import WeatherIcon
 import android.Manifest
 import android.os.Build
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
@@ -36,45 +37,22 @@ fun HomeScreen(
     navController: NavController,
     viewModel: HomeViewModel
 ) {
-    val context = LocalContext.current
     val scrollState = rememberScrollState()
 
-    val permissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        viewModel.onPermissionResult(permissions.values.any { it })
-    }
-
-    val locationSettingsLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartIntentSenderForResult()
-    ) {
-        viewModel.onLocationSettingsResult()
-    }
-
-    LaunchedEffect(viewModel.needsPermissionRequest.value) {
-        if (viewModel.needsPermissionRequest.value) {
-            permissionLauncher.launch(
-                arrayOf(
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                )
-            )
-        }
-    }
-
-    LaunchedEffect(viewModel.needsLocationSettings.value) {
-        viewModel.needsLocationSettings.value?.let { request ->
-            locationSettingsLauncher.launch(request)
-        }
-    }
 
     LaunchedEffect(viewModel.shouldNavigateToMap.value) {
-        if (viewModel.shouldNavigateToMap.value==true) {
+        if (viewModel.shouldNavigateToMap.value) {
             navController.navigate(Screens.LocationScreen) {
                 launchSingleTop = true
             }
-            viewModel.onMapNavigationHandled()
         }
+//        else{
+//            Log.i("TAG", "HomeScreen: "+viewModel.isNavBefore.value)
+//            if(viewModel.isNavBefore.value){
+//                navController.popBackStack()
+//                viewModel.isNavBefore.value = false
+//            }
+//        }
     }
     Box(
         modifier = Modifier
@@ -120,7 +98,7 @@ fun HomeScreen(
                             feelsLike = weather.main.feelsLike.roundToInt(),
                             timestamp = weather.dt,
                             condition = weather.weather.firstOrNull()?.description ?: "",
-                            unit = viewModel.getTemperatureUnit()
+                            unit = viewModel.temp.value
                         )
                     }
 

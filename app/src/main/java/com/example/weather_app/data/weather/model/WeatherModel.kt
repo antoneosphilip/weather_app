@@ -9,7 +9,7 @@ data class WeatherResponse(
     val weather: List<Weather>,
     val base: String,
     val main: Main,
-    val visibility: Int,
+    val visibility: Int?=null,
     val wind: Wind,
     val clouds: Clouds,
     val dt: Long,
@@ -65,7 +65,7 @@ data class Clouds(
 
 @Serializable
 data class Sys(
-    val country: String,
+    val country: String?=null,
     val sunrise: Long,
     val sunset: Long
 )
