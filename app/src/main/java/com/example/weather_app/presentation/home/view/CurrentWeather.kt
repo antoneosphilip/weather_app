@@ -40,7 +40,7 @@ fun CurrentWeather(
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "$temperature°$unit",
+            text = "$temperature$unit",
             color = Color.White,
             fontSize = 40.sp,
             fontWeight = FontWeight.Bold
@@ -57,7 +57,7 @@ fun CurrentWeather(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Feels Like: $feelsLike°$unit",
+            text = "Feels Like: $feelsLike$unit",
             color = Color.White.copy(alpha = 0.7f),
             fontSize = 14.sp
         )

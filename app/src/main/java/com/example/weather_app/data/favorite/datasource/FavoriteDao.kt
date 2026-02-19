@@ -16,6 +16,9 @@ interface FavoriteDao{
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun saveLocation(locationModel: LocationModel)
 
+    @Query("SELECT * FROM location")
+     fun getLocation():Flow<List<LocationModel>>
+
 }
 
 
