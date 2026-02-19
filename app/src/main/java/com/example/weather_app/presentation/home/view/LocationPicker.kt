@@ -11,6 +11,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import com.example.weather_app.LocationSource
+import com.example.weather_app.presentation.home.viewModel.HomeViewModel
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.example.weather_app.ui.theme.primary
@@ -24,10 +26,12 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LocationPickerScreen(
+    homeViewModel: HomeViewModel,
     currentLocation: LatLng?,
     onLocationSelected: (Double, Double, String) -> Unit,
-    onBack: () -> Unit
-) {
+    onBack: () -> Unit,
+    source: LocationSource
+    ) {
     val context = LocalContext.current
 
     var selectedPosition by remember {
@@ -37,7 +41,12 @@ fun LocationPickerScreen(
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(selectedPosition, 12f)
     }
-
+    LaunchedEffect(homeViewModel.shouldCloseMap.value&&source==LocationSource.HOME) {
+        if (homeViewModel.shouldCloseMap.value) {
+            homeViewModel.onMapClosed()
+            onBack()
+        }
+    }
     Scaffold(
         topBar = {
             TopAppBar(

@@ -20,6 +20,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.weather_app.LocationSource
 import com.example.weather_app.Screens
 import com.example.weather_app.presentation.components.CustomLoading
 import com.example.weather_app.presentation.components.ErrorMessage
@@ -41,9 +42,10 @@ fun HomeScreen(
 
     LaunchedEffect(viewModel.shouldNavigateToMap.value) {
         if (viewModel.shouldNavigateToMap.value) {
-            navController.navigate(Screens.LocationScreen) {
+            navController.navigate(Screens.LocationScreen(LocationSource.HOME)) {
                 launchSingleTop = true
             }
+            viewModel.onNavigatedToMap()
         }
 //        else{
 //            Log.i("TAG", "HomeScreen: "+viewModel.isNavBefore.value)

@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.weather_app.LocationSource
 import com.example.weather_app.Screens
 import com.example.weather_app.presentation.components.CustomLoading
 import com.example.weather_app.presentation.components.ErrorMessage
@@ -89,7 +90,7 @@ fun FavoritesScreen(nav: NavHostController,favoriteViewModel:FavoriteViewModel) 
                 .clip(CircleShape)
                 .background(Color.White)
                 .clickable {
-                    nav.navigate(Screens.LocationScreen) {
+                    nav.navigate(Screens.LocationScreen(LocationSource.FAVORITE)) {
                         launchSingleTop = true
                     }
                 }

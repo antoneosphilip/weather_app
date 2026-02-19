@@ -34,6 +34,8 @@ class HomeViewModel(
     var latLong: LatLng? = null
         private set
 
+    val shouldCloseMap = mutableStateOf(false)
+
 
     val temp=mutableStateOf("")
     init {
@@ -53,6 +55,11 @@ class HomeViewModel(
                     if(it.location=="Manual"){
                         shouldNavigateToMap.value=true
                     }
+                    else{
+                        shouldCloseMap.value = true
+                        shouldNavigateToMap.value = false
+
+                    }
                     latLong?.let {
                             it1 -> getAllWeatherData(it1.latitude,it1.longitude,it.languageCode,it.temperatureUnit)
                         temp.value=getUnit(it.temperatureUnit)
@@ -62,6 +69,13 @@ class HomeViewModel(
             }
         }
 
+    }
+
+    fun onMapClosed() {
+        shouldCloseMap.value = false
+    }
+    fun onNavigatedToMap() {
+        shouldNavigateToMap.value = false
     }
     fun getUnit(unit: String): String {
         return when (unit.lowercase()) {

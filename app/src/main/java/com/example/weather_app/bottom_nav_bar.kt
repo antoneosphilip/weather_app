@@ -16,47 +16,34 @@ fun BottomNavigationBar(
     navController: NavHostController,
     currentDestination: Any?
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
+    Box(modifier = Modifier.fillMaxWidth()) {
         NavigationBar(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(30.dp)),
+            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(30.dp)),
             containerColor = MaterialTheme.colorScheme.primary,
             tonalElevation = 0.dp
         ) {
             bottomNavItems.forEach { item ->
-                val isSelected = currentDestination == item.screen
+                val isSelected = when (item.screen) {
+                    Screens.FavoriteScreen ->
+                        currentDestination is Screens.FavoriteScreen ||
+                                currentDestination is Screens.FavoriteDetails
+                    else -> currentDestination == item.screen
+                }
 
                 NavigationBarItem(
                     selected = isSelected,
                     onClick = {
                         navController.navigate(item.screen) {
-                            popUpTo(Screens.HomeScreen) {
-                                saveState = true
-                            }
+                            popUpTo(Screens.HomeScreen) { saveState = true }
                             launchSingleTop = true
                             restoreState = true
                         }
                     },
-                    icon = {
-                        Icon(
-                            imageVector = item.icon,
-                            contentDescription = item.title,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    },
-                    label = {
-                        Text(
-                            text = item.title,
-                            fontSize = 12.sp
-                        )
-                    },
+                    icon = { Icon(imageVector = item.icon, contentDescription = item.title, modifier = Modifier.size(24.dp)) },
+                    label = { Text(text = item.title, fontSize = 12.sp) },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Color(0xFFFFFFFF),
-                        selectedTextColor = Color(0xFFFFFFFF),
+                        selectedIconColor = Color.White,
+                        selectedTextColor = Color.White,
                         unselectedIconColor = Color.Gray,
                         unselectedTextColor = Color.Gray,
                         indicatorColor = Color.Transparent
