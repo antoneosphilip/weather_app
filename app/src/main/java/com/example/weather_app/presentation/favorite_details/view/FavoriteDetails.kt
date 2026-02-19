@@ -1,5 +1,7 @@
-package com.example.weather_app.presentation.favorite.view
+package com.example.weather_app.presentation.favorite_details.view
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,8 +15,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
@@ -40,67 +44,55 @@ import com.example.weather_app.presentation.components.ErrorMessage
 import com.example.weather_app.presentation.favorite.viewModel.FavoriteUiState
 import com.example.weather_app.presentation.favorite.viewModel.FavoriteViewModel
 import com.example.weather_app.presentation.favorite.viewModel.FavoriteViewModelFactory
+import com.example.weather_app.presentation.favorite_details.viewModel.FavoriteDetailsUiState
+import com.example.weather_app.presentation.favorite_details.viewModel.FavoriteDetailsViewModel
+import com.example.weather_app.presentation.favorite_details.viewModel.FavoriteDetailsViewModelFactory
+import com.example.weather_app.presentation.home.view.WeatherComponent
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun FavoritesScreen(nav: NavHostController,favoriteViewModel:FavoriteViewModel) {
+fun FavoritesDetailsScreen(lat:Double,  long:Double) {
     val context= LocalContext.current
+    val favoriteDetailsViewModel: FavoriteDetailsViewModel = viewModel(
+        factory = FavoriteDetailsViewModelFactory(context,lat,long)
+    )
+    val scrollState = rememberScrollState()
+
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.primary)
-    ) {
-        Column {
-            when(val state=favoriteViewModel.favoriteStates.value){
-                is FavoriteUiState.Error -> {
-                    ErrorMessage(error = state.message)
-                }
+    )
 
-                is FavoriteUiState.Loading -> {
-                    CustomLoading()
-                }
-
-                is FavoriteUiState.Success -> {
-                    Column(
-                        modifier = Modifier
-                            .padding(top = 30.dp, start = 30.dp)
+    {
+        when(val state =favoriteDetailsViewModel.favoriteStates.value){
+            is FavoriteDetailsUiState.Error -> {
+                ErrorMessage(error = state.message)
+            }
+            FavoriteDetailsUiState.Loading -> {
+                CustomLoading()
+            }
+            is FavoriteDetailsUiState.Success -> {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(scrollState)
+                        .padding(16.dp)
+                ) {
+                    WeatherComponent(
+                        weather = state.currentWeather,
+                        hourlyForecast = state.hourlyForecast,
+                        dailyForecast = state.dailyForecast,
+                        temperatureUnit = favoriteDetailsViewModel.temp.value
                     ) {
-                        Text(
-                            text = "Favorites",
-                            fontSize = 24.sp,
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold
-                        )
 
                     }
-                    Spacer(modifier = Modifier.height(20.dp))
-                    FavoriteList(favoriteList = state.favoriteList, nav = nav)
                 }
             }
-
         }
 
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(bottom = 100.dp, end = 30.dp)
-                .size(50.dp)
-                .clip(CircleShape)
-                .background(Color.White)
-                .clickable {
-                    nav.navigate(Screens.LocationScreen) {
-                        launchSingleTop = true
-                    }
-                }
-        ) {
-            Icon(
-                imageVector = Icons.Default.Favorite,
-                contentDescription = "favorite",
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(28.dp)
-            )
-        }
+
 
     }
 }

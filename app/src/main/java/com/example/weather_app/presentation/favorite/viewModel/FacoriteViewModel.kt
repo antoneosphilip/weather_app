@@ -2,19 +2,28 @@ package com.example.weather_app.presentation.favorite.viewModel
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.weather_app.constant.Constants
 import com.example.weather_app.data.WeatherRepo
 import com.example.weather_app.data.favorite.model.LocationModel
+import com.example.weather_app.presentation.home.viewModel.HomeUiState
 import com.example.weather_app.presentation.home.viewModel.HomeViewModel
 import com.example.weather_app.presentation.setting.viewModel.SettingViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 class FavoriteViewModel(val context: Context) :ViewModel(){
     private val weatherRepo: WeatherRepo = WeatherRepo(context)
+     var favoriteStates= mutableStateOf<FavoriteUiState>(FavoriteUiState.Loading)
+        private set
 
-
+    init {
+        getLocation()
+    }
     fun saveLocation(locationModel: LocationModel){
        viewModelScope.launch {
            try{
@@ -22,12 +31,38 @@ class FavoriteViewModel(val context: Context) :ViewModel(){
                Log.i("Saveee", "saveLocation: ")
 
            }catch (e:Exception){
-
+               favoriteStates.value=FavoriteUiState.Error(e.message.toString())
            }
        }
     }
+    fun getLocation(){
+        favoriteStates.value=FavoriteUiState.Loading
+        viewModelScope.launch {
+            try{
+                weatherRepo.getLocation().collect{
+                    it->
+                    favoriteStates.value=FavoriteUiState.Success(it)
+                    Log.i("Saveee", "saveLocation: "+it)
 
+                }
 
+            }catch (e:Exception){
+                favoriteStates.value=FavoriteUiState.Error(e.message.toString())
+
+            }
+        }
+    }
+
+    fun getAllWeatherData(lat: Double, lon: Double, lan: String = "en", unit: String = "metric") {
+        Log.i("Get Data", "getAllWeatherData: ")
+        viewModelScope.launch {
+            val weather = weatherRepo.getWeather(lat, lon, Constants.apiKey, lan, unit)
+            val hourlyForecast = weatherRepo.getHourlyForecast(lat, lon, Constants.apiKey, lan, unit)
+            val dailyForecast = weatherRepo.getDailyForecast(lat, lon, Constants.apiKey, lan, unit)
+
+          //  uiState.value = HomeUiState.Success(weather, hourlyForecast, dailyForecast)
+        }
+    }
 }
 class FavoriteViewModelFactory(
     private val context: Context,

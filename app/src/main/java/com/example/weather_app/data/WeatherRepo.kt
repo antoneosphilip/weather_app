@@ -81,5 +81,10 @@ class WeatherRepo(context: Context) {
         favoriteLocalDataBase.saveLocation(locationModel)
     }
 
+     fun getLocation() :Flow<List<LocationModel>>{
+       return favoriteLocalDataBase.getLocation()
+    }
+
+
 }
 

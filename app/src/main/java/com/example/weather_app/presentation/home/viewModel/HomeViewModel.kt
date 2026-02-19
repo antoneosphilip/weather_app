@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.weather_app.constant.Constants
 import com.example.weather_app.data.WeatherRepo
 import com.example.weather_app.prefs.SharedPreferencesHelper
+import com.example.weather_app.presentation.favorite_details.viewModel.FavoriteDetailsUiState
 import com.example.weather_app.presentation.setting.viewModel.SettingViewModel
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.launch
@@ -33,13 +34,19 @@ class HomeViewModel(
     var latLong: LatLng? = null
         private set
 
-    var isNavBefore = mutableStateOf(false)
-        private set
 
     val temp=mutableStateOf("")
     init {
         viewModelScope.launch {
-            loadWeatherData()
+            latLong = locationProvider.getDeviceLocation()
+            latLong?.let {
+                weatherRepo.getSetting()?.let { it1 ->
+                    getAllWeatherData(it.latitude,it.longitude,
+                        it1.languageCode,it1.temperatureUnit)
+                    temp.value=getUnit(it1.temperatureUnit)
+
+                }
+            }
             weatherRepo.observeSettings().collect{
                 it->
                 if (it != null) {
@@ -48,7 +55,7 @@ class HomeViewModel(
                     }
                     latLong?.let {
                             it1 -> getAllWeatherData(it1.latitude,it1.longitude,it.languageCode,it.temperatureUnit)
-                        temp.value=it.temperatureUnit
+                        temp.value=getUnit(it.temperatureUnit)
                     }
                 }
 
@@ -56,44 +63,30 @@ class HomeViewModel(
         }
 
     }
-
-
-    fun onMapNavigationHandled() {
-        shouldNavigateToMap.value = false
-    }
-
-    fun loadWeatherData() {
-        uiState.value = HomeUiState.Loading
-
-        viewModelScope.launch {
-            try {
-
-                latLong = locationProvider.getDeviceLocation()
-
-                latLong?.let {
-                    getAllWeatherData(
-                        it.latitude,
-                        it.longitude,
-                        lan = SharedPreferencesHelper.getInstance(context).getString("language"),
-                        unit = SharedPreferencesHelper.getInstance(context).getString("temperature")
-                    )
-                }
-
-            } catch (e: Exception) {
-                Log.e("HomeViewModel", "Error: ${e.message}", e)
-                uiState.value = HomeUiState.Error(e.message ?: "Unknown error")
-            }
+    fun getUnit(unit: String): String {
+        return when (unit.lowercase()) {
+            "metric" -> "°C"
+            "imperial" -> "°F"
+            "standard" -> "K"
+            else -> ""
         }
     }
-
      fun getAllWeatherData(lat: Double, lon: Double, lan: String = "en", unit: String = "metric") {
-        Log.i("Get Data", "getAllWeatherData: ")
-        viewModelScope.launch {
-            val weather = weatherRepo.getWeather(lat, lon, Constants.apiKey, lan, unit)
-            val hourlyForecast = weatherRepo.getHourlyForecast(lat, lon, Constants.apiKey, lan, unit)
-            val dailyForecast = weatherRepo.getDailyForecast(lat, lon, Constants.apiKey, lan, unit)
+         uiState.value = HomeUiState.Loading
 
-            uiState.value = HomeUiState.Success(weather, hourlyForecast, dailyForecast)
+         Log.i("Get Data", "getAllWeatherData: ")
+        viewModelScope.launch {
+            try {
+                val weather = weatherRepo.getWeather(lat, lon, Constants.apiKey, lan, unit)
+                val hourlyForecast = weatherRepo.getHourlyForecast(lat, lon, Constants.apiKey, lan, unit)
+                val dailyForecast = weatherRepo.getDailyForecast(lat, lon, Constants.apiKey, lan, unit)
+
+                uiState.value = HomeUiState.Success(weather, hourlyForecast, dailyForecast)
+            }catch (e:Exception){
+                uiState.value = HomeUiState.Error(e.message ?: "Unknown error")
+
+            }
+
         }
     }
 

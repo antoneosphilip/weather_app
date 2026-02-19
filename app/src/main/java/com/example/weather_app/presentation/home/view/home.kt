@@ -33,7 +33,6 @@ import kotlin.math.roundToInt
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun HomeScreen(
-    settingViewModel: SettingViewModel,
     navController: NavController,
     viewModel: HomeViewModel
 ) {
@@ -83,43 +82,15 @@ fun HomeScreen(
                         .verticalScroll(scrollState)
                         .padding(16.dp)
                 ) {
-                    TopBar(cityName = weather.name)
-
-                    Spacer(modifier = Modifier.height(32.dp))
-
-                    Row(
-                        modifier = Modifier.clickable {
-                            navController.navigate(Screens.LocationScreen)
-                        }
-                    ) {
-                        CurrentWeather(
-                            temperature = weather.main.temp.roundToInt(),
-                            icon = weather.weather.firstOrNull()?.icon ?: "",
-                            feelsLike = weather.main.feelsLike.roundToInt(),
-                            timestamp = weather.dt,
-                            condition = weather.weather.firstOrNull()?.description ?: "",
-                            unit = viewModel.temp.value
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    WeatherDetailsGrid(
-                        humidity = weather.main.humidity,
-                        windSpeed = weather.wind.speed,
-                        pressure = weather.main.pressure,
-                        clouds = weather.clouds.all
-                    )
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    HourlyForecast(hourlyForecast)
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    DailyForecast(dailyForecast)
-
-                    Spacer(modifier = Modifier.height(80.dp))
+                   WeatherComponent(
+                       weather = weather,
+                       hourlyForecast = hourlyForecast,
+                       dailyForecast = dailyForecast,
+                       temperatureUnit = viewModel.temp.value,
+                       onLocationClick = {
+                           navController.navigate(Screens.LocationScreen)
+                       }
+                   )
                 }
             }
         }

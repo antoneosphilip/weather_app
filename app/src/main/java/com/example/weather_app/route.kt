@@ -8,10 +8,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
 import com.example.weather_app.data.favorite.model.LocationModel
 import com.example.weather_app.presentation.favorite.view.FavoritesScreen
 import com.example.weather_app.presentation.favorite.viewModel.FavoriteViewModel
 import com.example.weather_app.presentation.favorite.viewModel.FavoriteViewModelFactory
+import com.example.weather_app.presentation.favorite_details.view.FavoritesDetailsScreen
 import com.example.weather_app.presentation.home.view.HomeScreen
 import com.example.weather_app.presentation.home.view.LocationPickerScreen
 import com.example.weather_app.presentation.home.viewModel.HomeViewModel
@@ -34,6 +36,12 @@ sealed class Screens{
 
     @Serializable
     object LocationScreen :Screens()
+
+    @Serializable
+    data class FavoriteDetails(
+        val lat:Double,
+        val long:Double
+    ) : Screens()
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -61,7 +69,7 @@ fun MyApp(nav: NavHostController,) {
     ) {
 
         composable<Screens.HomeScreen> {
-            HomeScreen(settingViewModel,nav,homeViewModel)
+            HomeScreen(nav,homeViewModel)
         }
         composable<Screens.AlertScreen> {
             AlertsScreen(nav)
@@ -72,7 +80,12 @@ fun MyApp(nav: NavHostController,) {
 
         }
         composable<Screens.FavoriteScreen> {b->
-            FavoritesScreen(nav)
+            FavoritesScreen(nav,favoriteViewModel)
+        }
+
+        composable<Screens.FavoriteDetails> {
+            b-> val args = b.toRoute<Screens.FavoriteDetails>()
+            FavoritesDetailsScreen(args.lat,args.long)
         }
         composable<Screens.LocationScreen> {b->
             LocationPickerScreen(
@@ -81,6 +94,7 @@ fun MyApp(nav: NavHostController,) {
                 onLocationSelected = { lat, lng ,addreess->
 
                   homeViewModel.getAllWeatherData(lat,lng)
+
                     favoriteViewModel.saveLocation(LocationModel(
                         lat=lat,
                         long = lng,
@@ -90,10 +104,7 @@ fun MyApp(nav: NavHostController,) {
                 onBack = {
                     nav.popBackStack()
                 }
-                )
+            )
         }
-
-
-
     }
 }
