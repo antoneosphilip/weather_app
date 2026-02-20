@@ -22,6 +22,11 @@ import androidx.compose.ui.semantics.Role.Companion.Button
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.weather_app.ui.theme.accent
+import com.example.weather_app.ui.theme.primary
+import com.example.weather_app.ui.theme.redCancel
+import com.example.weather_app.ui.theme.secondary
+import com.example.weather_app.ui.theme.white
 import java.util.Calendar
 
 @Composable

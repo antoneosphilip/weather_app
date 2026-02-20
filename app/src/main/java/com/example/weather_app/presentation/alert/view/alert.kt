@@ -1,5 +1,6 @@
 package com.example.weather_app.presentation.alert.view
 
+import AlertViewModelFactory
 import AlertsViewModel
 import android.app.TimePickerDialog
 import android.content.Context
@@ -17,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -24,24 +26,29 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.weather_app.ui.theme.primary
 
 
 @Composable
 fun AlertsScreen(nav: NavHostController) {
+    val context = LocalContext.current
 
-    val viewModel: AlertsViewModel = viewModel()
+    val accent = Color(0xFF4EEEC8)
+
+    val viewModel: AlertsViewModel = viewModel(
+        factory=AlertViewModelFactory(context)
+    )
 
     val showDialog by viewModel.showDialog.collectAsState()
     val startTime by viewModel.startTime.collectAsState()
     val endTime by viewModel.endTime.collectAsState()
     val selectedType by viewModel.selectedType.collectAsState()
 
-    val context = LocalContext.current
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.primary)
+            .background(primary)
     ) {
 
         Column(
@@ -58,13 +65,13 @@ fun AlertsScreen(nav: NavHostController) {
                     Text(
                         text = "My Alerts",
                         fontSize = 24.sp,
-                        color = Color.White,
+                        color = White,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
                         text = "0 active alerts",
                         fontSize = 14.sp,
-                        color = Color.White.copy(alpha = 0.5f)
+                        color =White.copy(alpha = 0.5f)
                     )
                 }
 
@@ -72,13 +79,13 @@ fun AlertsScreen(nav: NavHostController) {
                     modifier = Modifier
                         .size(48.dp)
                         .clip(CircleShape)
-                        .border(1.5.dp, Color.Accent, CircleShape),
+                        .border(1.5.dp, accent, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Notifications,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.acc,
+                        tint =accent,
                         modifier = Modifier.size(33.dp)
                     )
                 }

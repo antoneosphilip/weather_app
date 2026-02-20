@@ -9,6 +9,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.weather_app.ui.theme.accent
+import com.example.weather_app.ui.theme.primary
+import com.example.weather_app.ui.theme.white
 
 @Composable
 fun NotifyTypeButton(label: String, selected: Boolean, onClick: () -> Unit) {

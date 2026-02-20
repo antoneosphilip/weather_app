@@ -1,9 +1,11 @@
 import android.content.Context
 import androidx.compose.runtime.MutableState
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.weather_app.data.WeatherRepo
 import com.example.weather_app.data.alert.model.AlertModel
+import com.example.weather_app.presentation.favorite.viewModel.FavoriteViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -72,6 +74,15 @@ class AlertsViewModel(context: Context) : ViewModel() {
     }
 
     fun getAlerts(){
+
+    }
+
+}
+class AlertViewModelFactory(
+    private val context: Context,
+) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        return AlertsViewModel(context) as T
 
     }
 }

@@ -2,7 +2,9 @@ package com.example.weather_app.data.alert.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Entity(tableName = "alerts")
 data class AlertModel(
     @PrimaryKey(autoGenerate = true)
