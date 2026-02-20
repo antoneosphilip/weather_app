@@ -1,6 +1,8 @@
 package com.example.weather_app.data
 
 import android.content.Context
+import com.example.weather_app.data.alert.datasouce.AlertLocalDataBase
+import com.example.weather_app.data.alert.model.AlertModel
 import com.example.weather_app.data.favorite.datasource.FavoriteLocalDataBase
 import com.example.weather_app.data.favorite.model.LocationModel
 import com.example.weather_app.data.weather.datasource.local.WeatherLocalDataBase
@@ -15,6 +17,8 @@ class WeatherRepo(context: Context) {
     private val weatherRemoteData = WeatherRemoteDataSource()
     private val weatherLocalData = WeatherLocalDataBase(context)
     private val favoriteLocalDataBase=FavoriteLocalDataBase(context)
+    private val alertLocalDataBase= AlertLocalDataBase(context)
+
     suspend fun getWeather(
         lat: Double,
         lon: Double,
@@ -85,6 +89,15 @@ class WeatherRepo(context: Context) {
        return favoriteLocalDataBase.getLocation()
     }
 
+
+   suspend fun saveAlert(alertModel: AlertModel){
+        alertLocalDataBase.saveAlert(alertModel)
+    }
+
+    fun getAlert():Flow<List<AlertModel>>
+    {
+        return alertLocalDataBase.getAlert()
+    }
 
 }
 

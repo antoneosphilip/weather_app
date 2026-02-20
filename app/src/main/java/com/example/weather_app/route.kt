@@ -10,6 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.example.weather_app.data.favorite.model.LocationModel
+import com.example.weather_app.presentation.alert.view.AlertsScreen
 import com.example.weather_app.presentation.favorite.view.FavoritesScreen
 import com.example.weather_app.presentation.favorite.viewModel.FavoriteViewModel
 import com.example.weather_app.presentation.favorite.viewModel.FavoriteViewModelFactory
