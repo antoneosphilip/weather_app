@@ -19,6 +19,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.weather_app.ui.theme.accent
+import com.example.weather_app.ui.theme.primary
+import com.example.weather_app.ui.theme.white
 
 @Composable
 fun TimePickerField(label: String, onClick: () -> Unit) {

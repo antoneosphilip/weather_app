@@ -105,7 +105,6 @@ fun MyApp(nav: NavHostController,) {
                     LatLng(it.latitude, it.longitude)
                 },
                 onLocationSelected = { lat, lng, address ->
-
                     when (source) {
 
                         LocationSource.HOME -> {

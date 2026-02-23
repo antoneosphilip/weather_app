@@ -42,12 +42,13 @@ class HomeViewModel(
         viewModelScope.launch {
             latLong = locationProvider.getDeviceLocation()
             latLong?.let {
-                weatherRepo.getSetting()?.let { it1 ->
-                    getAllWeatherData(it.latitude,it.longitude,
-                        it1.languageCode,it1.temperatureUnit)
-                    temp.value=getUnit(it1.temperatureUnit)
 
-                }
+               val setting= weatherRepo.getSetting()
+                val language = setting?.languageCode ?: "en"
+                val unit = setting?.temperatureUnit ?: "metric"
+                getAllWeatherData(it.latitude,it.longitude,
+                    language,unit)
+                temp.value=getUnit(unit)
             }
             weatherRepo.observeSettings().collect{
                 it->
@@ -98,7 +99,6 @@ class HomeViewModel(
                 uiState.value = HomeUiState.Success(weather, hourlyForecast, dailyForecast)
             }catch (e:Exception){
                 uiState.value = HomeUiState.Error(e.message ?: "Unknown error")
-
             }
 
         }

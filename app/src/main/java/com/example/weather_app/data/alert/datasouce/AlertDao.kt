@@ -12,6 +12,5 @@ interface AlertDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun saveAlert(alertMode: AlertModel)
 
-    @Query("SELECT * FROM alerts")
-    fun getAlert(): Flow<List<AlertModel>>
+    @Query("SELECT * FROM alerts") fun getAlert(): Flow<List<AlertModel>>
 }
