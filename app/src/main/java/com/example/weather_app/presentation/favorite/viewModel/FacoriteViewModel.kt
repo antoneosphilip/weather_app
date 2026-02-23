@@ -53,16 +53,6 @@ class FavoriteViewModel(val context: Context) :ViewModel(){
         }
     }
 
-    fun getAllWeatherData(lat: Double, lon: Double, lan: String = "en", unit: String = "metric") {
-        Log.i("Get Data", "getAllWeatherData: ")
-        viewModelScope.launch {
-            val weather = weatherRepo.getWeather(lat, lon, Constants.apiKey, lan, unit)
-            val hourlyForecast = weatherRepo.getHourlyForecast(lat, lon, Constants.apiKey, lan, unit)
-            val dailyForecast = weatherRepo.getDailyForecast(lat, lon, Constants.apiKey, lan, unit)
-
-          //  uiState.value = HomeUiState.Success(weather, hourlyForecast, dailyForecast)
-        }
-    }
 }
 class FavoriteViewModelFactory(
     private val context: Context,

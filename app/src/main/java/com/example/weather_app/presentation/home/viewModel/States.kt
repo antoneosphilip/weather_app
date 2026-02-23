@@ -6,8 +6,6 @@ import com.example.weather_app.data.weather.model.WeatherResponse
 
 sealed class HomeUiState {
     data object Loading : HomeUiState()
-
-
     data class Error(val message: String) : HomeUiState()
     data class Success(
         val currentWeather: WeatherResponse,

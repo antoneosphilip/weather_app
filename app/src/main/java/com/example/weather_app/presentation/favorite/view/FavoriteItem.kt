@@ -40,11 +40,8 @@ fun FavoriteItem(locationModel: LocationModel,nav:NavController) {
                 shape = RoundedCornerShape(50.dp)
             )
             .clickable {
-                nav.navigate(Screens.FavoriteDetails(locationModel.lat,locationModel.long)){
-                    popUpTo(Screens.FavoriteScreen) { saveState = true }
-                    launchSingleTop = true
+                nav.navigate(Screens.FavoriteDetails(lat =locationModel.lat, long = locationModel.long))
 
-                }
 
             }
             .padding(horizontal = 20.dp, vertical = 20.dp),

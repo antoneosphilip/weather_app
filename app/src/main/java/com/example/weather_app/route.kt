@@ -10,6 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.example.weather_app.data.favorite.model.LocationModel
+import com.example.weather_app.presentation.alert.view.AlertsScreen
 import com.example.weather_app.presentation.favorite.view.FavoritesScreen
 import com.example.weather_app.presentation.favorite.viewModel.FavoriteViewModel
 import com.example.weather_app.presentation.favorite.viewModel.FavoriteViewModelFactory
@@ -35,13 +36,19 @@ sealed class Screens{
     object SettingScreen :Screens()
 
     @Serializable
-    object LocationScreen :Screens()
+    data class LocationScreen(
+        val locationSource: LocationSource
+    ) :Screens()
 
     @Serializable
     data class FavoriteDetails(
         val lat:Double,
         val long:Double
     ) : Screens()
+}
+enum class LocationSource {
+    HOME,
+    FAVORITE
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -83,27 +90,43 @@ fun MyApp(nav: NavHostController,) {
             FavoritesScreen(nav,favoriteViewModel)
         }
 
-        composable<Screens.FavoriteDetails> {
-            b-> val args = b.toRoute<Screens.FavoriteDetails>()
-            FavoritesDetailsScreen(args.lat,args.long)
+
+        composable<Screens.FavoriteDetails> { b ->
+            val args = b.toRoute<Screens.FavoriteDetails>()
+            FavoritesDetailsScreen(args.lat, args.long)
         }
-        composable<Screens.LocationScreen> {b->
+        composable<Screens.LocationScreen> { backStackEntry ->
+
+            val args = backStackEntry.toRoute<Screens.LocationScreen>()
+            val source = args.locationSource
+
             LocationPickerScreen(
-                currentLocation = homeViewModel.latLong?.let { LatLng(it.latitude,
-                    it.longitude) },
-                onLocationSelected = { lat, lng ,addreess->
+                currentLocation = homeViewModel.latLong?.let {
+                    LatLng(it.latitude, it.longitude)
+                },
+                onLocationSelected = { lat, lng, address ->
+                    when (source) {
 
-                  homeViewModel.getAllWeatherData(lat,lng)
+                        LocationSource.HOME -> {
+                            homeViewModel.getAllWeatherData(lat, lng)
+                        }
 
-                    favoriteViewModel.saveLocation(LocationModel(
-                        lat=lat,
-                        long = lng,
-                        location = addreess,
-                    ))
+                        LocationSource.FAVORITE -> {
+                            favoriteViewModel.saveLocation(
+                                LocationModel(
+                                    lat = lat,
+                                    long = lng,
+                                    location = address
+                                )
+                            )
+                        }
+                    }
                 },
                 onBack = {
                     nav.popBackStack()
-                }
+                },
+                homeViewModel = homeViewModel,
+                source = source
             )
         }
     }

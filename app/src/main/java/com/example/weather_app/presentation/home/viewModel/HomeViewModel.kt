@@ -34,24 +34,32 @@ class HomeViewModel(
     var latLong: LatLng? = null
         private set
 
+    val shouldCloseMap = mutableStateOf(false)
+
 
     val temp=mutableStateOf("")
     init {
         viewModelScope.launch {
             latLong = locationProvider.getDeviceLocation()
             latLong?.let {
-                weatherRepo.getSetting()?.let { it1 ->
-                    getAllWeatherData(it.latitude,it.longitude,
-                        it1.languageCode,it1.temperatureUnit)
-                    temp.value=getUnit(it1.temperatureUnit)
 
-                }
+               val setting= weatherRepo.getSetting()
+                val language = setting?.languageCode ?: "en"
+                val unit = setting?.temperatureUnit ?: "metric"
+                getAllWeatherData(it.latitude,it.longitude,
+                    language,unit)
+                temp.value=getUnit(unit)
             }
             weatherRepo.observeSettings().collect{
                 it->
                 if (it != null) {
                     if(it.location=="Manual"){
                         shouldNavigateToMap.value=true
+                    }
+                    else{
+                        shouldCloseMap.value = true
+                        shouldNavigateToMap.value = false
+
                     }
                     latLong?.let {
                             it1 -> getAllWeatherData(it1.latitude,it1.longitude,it.languageCode,it.temperatureUnit)
@@ -62,6 +70,13 @@ class HomeViewModel(
             }
         }
 
+    }
+
+    fun onMapClosed() {
+        shouldCloseMap.value = false
+    }
+    fun onNavigatedToMap() {
+        shouldNavigateToMap.value = false
     }
     fun getUnit(unit: String): String {
         return when (unit.lowercase()) {
@@ -84,7 +99,6 @@ class HomeViewModel(
                 uiState.value = HomeUiState.Success(weather, hourlyForecast, dailyForecast)
             }catch (e:Exception){
                 uiState.value = HomeUiState.Error(e.message ?: "Unknown error")
-
             }
 
         }

@@ -48,15 +48,18 @@ class MainActivity : ComponentActivity() {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     bottomBar = {
+                        val selectedScreen = when {
+                            currentDestination == Screens.HomeScreen::class.qualifiedName -> Screens.HomeScreen
+                            currentDestination == Screens.FavoriteScreen::class.qualifiedName -> Screens.FavoriteScreen
+                            currentDestination?.startsWith(Screens.FavoriteDetails::class.qualifiedName ?: "") == true -> Screens.FavoriteScreen
+                            currentDestination == Screens.AlertScreen::class.qualifiedName -> Screens.AlertScreen
+                            currentDestination == Screens.SettingScreen::class.qualifiedName -> Screens.SettingScreen
+                            else -> Screens.HomeScreen
+                        }
+
                         BottomNavigationBar(
                             navController = navController,
-                            currentDestination = when (currentDestination) {
-                                Screens.HomeScreen::class.qualifiedName -> Screens.HomeScreen
-                                Screens.FavoriteScreen::class.qualifiedName -> Screens.FavoriteScreen
-                                Screens.AlertScreen::class.qualifiedName -> Screens.AlertScreen
-                                Screens.SettingScreen::class.qualifiedName -> Screens.SettingScreen
-                                else -> Screens.HomeScreen
-                            }
+                            currentDestination = selectedScreen
                         )
                     }
                 ) { innerPadding ->
