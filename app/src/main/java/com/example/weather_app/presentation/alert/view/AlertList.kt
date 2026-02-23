@@ -14,7 +14,7 @@ fun AlertList(viewModel: AlertsViewModel, alertList: List<AlertModel>){
         items(alertList) { alert ->
             AlertCard(
                 alert =alert,
-                onDelete = {  },
+                onDelete = { viewModel.deleteAlert(alert.id) },
                 onToggle = {viewModel.toggleAlert(alert)}
             )
         }

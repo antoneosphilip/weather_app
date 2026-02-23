@@ -15,4 +15,10 @@ class AlertLocalDataBase(val context: Context) {
      fun getAlert(): Flow<List<AlertModel>> {
         return alertDao.getAlert()
     }
+
+
+
+    suspend fun deleteAlert(alertId: Int){
+         alertDao.deleteAlert(alertId)
+    }
 }

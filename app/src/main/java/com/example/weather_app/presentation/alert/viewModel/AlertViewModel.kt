@@ -73,6 +73,12 @@ class AlertsViewModel(val context: Context) : ViewModel() {
         }
     }
 
+    fun deleteAlert(alertId: Int){
+        viewModelScope.launch {
+            weatherRepo.deleteAlert(alertId)
+        }
+    }
+
     fun saveAlert() {
         if (_startTime.value.isBlank() || _endTime.value.isBlank()) return
 
