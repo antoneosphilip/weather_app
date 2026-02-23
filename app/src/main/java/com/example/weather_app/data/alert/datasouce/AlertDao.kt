@@ -13,4 +13,7 @@ interface AlertDao {
     suspend fun saveAlert(alertMode: AlertModel)
 
     @Query("SELECT * FROM alerts") fun getAlert(): Flow<List<AlertModel>>
+
+    @Query("DELETE FROM alerts WHERE id = :alertId")
+    suspend fun deleteAlert(alertId: Int)
 }

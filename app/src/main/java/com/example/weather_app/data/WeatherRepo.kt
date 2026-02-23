@@ -98,6 +98,10 @@ class WeatherRepo(context: Context) {
     {
         return alertLocalDataBase.getAlert()
     }
+    suspend fun deleteAlert(alertId: Int)
+    {
+         alertLocalDataBase.deleteAlert(alertId)
+    }
 
 }
 

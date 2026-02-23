@@ -43,7 +43,10 @@ class HomeViewModel(
             latLong = locationProvider.getDeviceLocation()
             latLong?.let {
 
-               val setting= weatherRepo.getSetting()
+                SharedPreferencesHelper.getInstance(context).save("lat",it.latitude)
+                SharedPreferencesHelper.getInstance(context).save("lon",it.longitude)
+
+                val setting= weatherRepo.getSetting()
                 val language = setting?.languageCode ?: "en"
                 val unit = setting?.temperatureUnit ?: "metric"
                 getAllWeatherData(it.latitude,it.longitude,

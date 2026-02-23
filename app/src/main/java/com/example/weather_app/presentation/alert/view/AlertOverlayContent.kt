@@ -59,11 +59,13 @@ class AlertOverlayService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val message = intent?.getStringExtra("WEATHER_MESSAGE")
+            ?: "There are weather alerts, please stay safe and take care!"
         startForegroundWithNotification()
         playAlarmSound()
-        showOverlay()
+        showOverlay(message)
+        return START_NOT_STICKY
     }
 
     private fun startForegroundWithNotification() {
@@ -89,7 +91,7 @@ class AlertOverlayService : Service() {
         ringtone?.play()
     }
 
-    private fun showOverlay() {
+    private fun showOverlay(message: String) {
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         lifecycleOwner.startLifecycle()
 
@@ -98,6 +100,7 @@ class AlertOverlayService : Service() {
             setViewTreeSavedStateRegistryOwner(lifecycleOwner)
             setContent {
                 WeatherAlertDialog(
+                    message = message,
                     onDismiss = { stopSelf() },
                     onCancel = { stopSelf() }
                 )
@@ -132,7 +135,7 @@ class AlertOverlayService : Service() {
 }
 
 @Composable
-fun WeatherAlertDialog(onDismiss: () -> Unit, onCancel: () -> Unit) {
+fun WeatherAlertDialog(message: String, onDismiss: () -> Unit, onCancel: () -> Unit) {
     Card(
         modifier = Modifier
             .width(300.dp)
@@ -154,7 +157,7 @@ fun WeatherAlertDialog(onDismiss: () -> Unit, onCancel: () -> Unit) {
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "WEZY has bad news for you ⛈️",
+                text = "WEZY Weather Alert",
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
                 color = Color.White,
@@ -162,7 +165,7 @@ fun WeatherAlertDialog(onDismiss: () -> Unit, onCancel: () -> Unit) {
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "There are weather alerts for this duration, please stay safe and take care!",
+                text = message,
                 fontSize = 14.sp,
                 color = Color.White.copy(alpha = 0.8f),
                 textAlign = TextAlign.Center
