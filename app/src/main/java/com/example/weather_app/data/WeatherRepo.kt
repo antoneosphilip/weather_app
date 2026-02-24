@@ -90,8 +90,8 @@ class WeatherRepo(context: Context) {
     }
 
 
-   suspend fun saveAlert(alertModel: AlertModel){
-        alertLocalDataBase.saveAlert(alertModel)
+   suspend fun saveAlert(alertModel: AlertModel):Long{
+       return alertLocalDataBase.saveAlert(alertModel)
     }
 
     fun getAlert():Flow<List<AlertModel>>

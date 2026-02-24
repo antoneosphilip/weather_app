@@ -8,8 +8,8 @@ import kotlinx.coroutines.flow.Flow
 class AlertLocalDataBase(val context: Context) {
     private val alertDao=DataBase.getInstance(context).getAlertDao()
 
-    suspend fun saveAlert( alertMode: AlertModel){
-        alertDao.saveAlert(alertMode)
+    suspend fun saveAlert( alertMode: AlertModel):Long{
+       return alertDao.saveAlert(alertMode)
     }
 
      fun getAlert(): Flow<List<AlertModel>> {

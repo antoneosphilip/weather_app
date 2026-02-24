@@ -25,8 +25,9 @@ class AlertWorker(context: Context, params: WorkerParameters)
     override suspend fun doWork(): Result {
         val endTime = inputData.getLong("END_TIME", 0)
         val isNotification = inputData.getBoolean("IS_NOTIFICATION", false)
-        val location=LocationProvider(applicationContext)
         val now = System.currentTimeMillis()
+        val alertId = inputData.getLong("ALERT_ID", -1L)
+
         val weatherRepo=WeatherRepo(applicationContext)
         Log.i("AlertWorker", "doWork fired! isNotification=$isNotification")
 
@@ -52,7 +53,12 @@ class AlertWorker(context: Context, params: WorkerParameters)
                     showAlarm(message)
                 }
                 Log.i("succccc", "s: "+weatherResponse.weather[0].id)
+                Log.i("succccc", "s: "+alertId)
 
+                if (alertId != -1L) {
+                        Log.i("deleteee", "doWork: ")
+                        weatherRepo.deleteAlert(alertId.toInt())
+                    }
                 Result.success()
 
             } catch (e: Exception) {
@@ -61,7 +67,9 @@ class AlertWorker(context: Context, params: WorkerParameters)
                 Result.retry()
             }
 
+
         }
+
         return Result.success()
     }
 
