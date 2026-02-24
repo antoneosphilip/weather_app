@@ -11,7 +11,7 @@ import com.example.weather_app.data.favorite.model.LocationModel
 import com.example.weather_app.data.weather.datasource.local.WeatherDao
 import com.example.weather_app.data.weather.model.SettingModel
 
-@Database(entities = [SettingModel::class,LocationModel::class,AlertModel::class], version =6)
+@Database(entities = [SettingModel::class,LocationModel::class,AlertModel::class], version =8)
 abstract class DataBase : RoomDatabase() {
     abstract fun getWeatherDao(): WeatherDao
 

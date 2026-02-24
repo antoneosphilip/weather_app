@@ -13,6 +13,8 @@ import com.example.weather_app.prefs.SharedPreferencesHelper
 import com.example.weather_app.presentation.favorite_details.viewModel.FavoriteDetailsUiState
 import com.example.weather_app.presentation.setting.viewModel.SettingViewModel
 import com.google.android.gms.maps.model.LatLng
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @Suppress("UNREACHABLE_CODE")
@@ -42,34 +44,37 @@ class HomeViewModel(
         viewModelScope.launch {
             latLong = locationProvider.getDeviceLocation()
             latLong?.let {
-
-                SharedPreferencesHelper.getInstance(context).save("lat",it.latitude)
-                SharedPreferencesHelper.getInstance(context).save("lon",it.longitude)
-
                 val setting= weatherRepo.getSetting()
                 val language = setting?.languageCode ?: "en"
                 val unit = setting?.temperatureUnit ?: "metric"
                 getAllWeatherData(it.latitude,it.longitude,
                     language,unit)
                 temp.value=getUnit(unit)
+                SharedPreferencesHelper.getInstance(context).save("lat",it.latitude)
+                SharedPreferencesHelper.getInstance(context).save("lon",it.longitude)
             }
-            weatherRepo.observeSettings().collect{
-                it->
-                if (it != null) {
-                    if(it.location=="Manual"){
-                        shouldNavigateToMap.value=true
-                    }
-                    else{
-                        shouldCloseMap.value = true
-                        shouldNavigateToMap.value = false
+            launch {
+                weatherRepo.observeSettings().collectLatest { it ->
+                    if (it != null) {
+                        if (it.location == "Manual") {
+                            shouldNavigateToMap.value = true
+                        } else {
+                            shouldCloseMap.value = true
+                            shouldNavigateToMap.value = false
 
+                        }
+                        latLong?.let { it1 ->
+                            getAllWeatherData(
+                                it1.latitude,
+                                it1.longitude,
+                                it.languageCode,
+                                it.temperatureUnit
+                            )
+                            temp.value = getUnit(it.temperatureUnit)
+                        }
                     }
-                    latLong?.let {
-                            it1 -> getAllWeatherData(it1.latitude,it1.longitude,it.languageCode,it.temperatureUnit)
-                        temp.value=getUnit(it.temperatureUnit)
-                    }
+
                 }
-
             }
         }
 
@@ -93,18 +98,32 @@ class HomeViewModel(
          uiState.value = HomeUiState.Loading
 
          Log.i("Get Data", "getAllWeatherData: ")
-        viewModelScope.launch {
-            try {
-                val weather = weatherRepo.getWeather(lat, lon, Constants.apiKey, lan, unit)
-                val hourlyForecast = weatherRepo.getHourlyForecast(lat, lon, Constants.apiKey, lan, unit)
-                val dailyForecast = weatherRepo.getDailyForecast(lat, lon, Constants.apiKey, lan, unit)
+         viewModelScope.launch {
+             try {
 
-                uiState.value = HomeUiState.Success(weather, hourlyForecast, dailyForecast)
-            }catch (e:Exception){
-                uiState.value = HomeUiState.Error(e.message ?: "Unknown error")
-            }
+                 val weatherDeferred = async {
+                     weatherRepo.getWeather(lat, lon, Constants.apiKey, lan, unit)
+                 }
 
-        }
+                 val hourlyDeferred = async {
+                     weatherRepo.getHourlyForecast(lat, lon, Constants.apiKey, lan, unit)
+                 }
+
+                 val dailyDeferred = async {
+                     weatherRepo.getDailyForecast(lat, lon, Constants.apiKey, lan, unit)
+                 }
+
+                 val weather = weatherDeferred.await()
+                 val hourlyForecast = hourlyDeferred.await()
+                 val dailyForecast = dailyDeferred.await()
+
+                 uiState.value =
+                     HomeUiState.Success(weather, hourlyForecast, dailyForecast)
+
+             } catch (e: Exception) {
+                 uiState.value = HomeUiState.Error(e.message ?: "Unknown error")
+             }
+         }
     }
 
 }

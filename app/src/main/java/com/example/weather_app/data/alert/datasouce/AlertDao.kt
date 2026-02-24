@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface AlertDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun saveAlert(alertMode: AlertModel)
+    suspend fun saveAlert(alertMode: AlertModel):Long
 
     @Query("SELECT * FROM alerts") fun getAlert(): Flow<List<AlertModel>>
 

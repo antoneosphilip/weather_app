@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import java.util.UUID
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
 
@@ -68,12 +69,31 @@ class AlertsViewModel(val context: Context) : ViewModel() {
     }
 
     fun toggleAlert(alert: AlertModel) {
-        viewModelScope.launch {
-            weatherRepo.saveAlert(alert.copy(isActive = !alert.isActive))
+        if (alert.isActive) {
+            cancelWork(alert.workId)
+            viewModelScope.launch {
+                weatherRepo.saveAlert(alert.copy(isActive = !alert.isActive))
+            }
         }
+        else{
+          val workId=  scheduleAlert(startTimeMillis = alert.startTime, endTimeMillis = alert.endTime?:0L,
+              _selectedType.value=="Notification",alert.id.toLong()
+          )
+            viewModelScope.launch {
+                weatherRepo.saveAlert(
+                    alert.copy(
+                        isActive = true,
+                        workId = workId.toString()
+                    )
+                )
+            }
+        }
+
     }
 
-    fun deleteAlert(alertId: Int){
+    fun deleteAlert(alertId: Int,workId:String){
+        cancelWork(workId)
+
         viewModelScope.launch {
             weatherRepo.deleteAlert(alertId)
         }
@@ -117,32 +137,50 @@ class AlertsViewModel(val context: Context) : ViewModel() {
         Log.i("Alerts", "now: ${System.currentTimeMillis()}")
         Log.i("Alerts", "delay: ${startMillis - System.currentTimeMillis()}")
 
+
         viewModelScope.launch {
-            weatherRepo.saveAlert(
+            val alertId = weatherRepo.saveAlert(
                 AlertModel(
                     startTime = startMillis,
                     endTime = endMillis,
                     type = _selectedType.value,
                     label = "weather alarm",
-                    isActive = true
+                    isActive = true,
+                    workId = ""
                 )
             )
-        }
 
-        scheduleAlert(startMillis, endMillis,_selectedType.value=="Notification")
+            val workId = scheduleAlert(
+                startMillis,
+                endMillis,
+                _selectedType.value == "Notification",
+                alertId = alertId
+            )
 
+            weatherRepo.saveAlert(
+                AlertModel(
+                    id = alertId.toInt(),
+                    startTime = startMillis,
+                    endTime = endMillis,
+                    type = _selectedType.value,
+                    label = "weather alarm",
+                    isActive = true,
+                    workId = workId.toString()
+                )
+            )
+}
         _showDialog.value = false
         _startTime.value = ""
         _endTime.value = ""
-        _selectedType.value = "Alarm"
+
     }
-    private fun scheduleAlert(startTimeMillis: Long, endTimeMillis: Long, isNotification: Boolean) {
+    private fun scheduleAlert(startTimeMillis: Long, endTimeMillis: Long, isNotification: Boolean,alertId: Long): UUID {
         val delay = max(0, startTimeMillis - System.currentTimeMillis())
 
         val inputData = androidx.work.Data.Builder()
-            .putLong("START_TIME", startTimeMillis)
             .putLong("END_TIME", endTimeMillis)
             .putBoolean("IS_NOTIFICATION", isNotification)
+            .putLong("ALERT_ID",alertId)
             .build()
 
         val request = OneTimeWorkRequestBuilder<AlertWorker>()
@@ -151,8 +189,14 @@ class AlertsViewModel(val context: Context) : ViewModel() {
             .build()
 
         WorkManager.getInstance(context).enqueue(request)
+        return request.id
     }
 
+    private fun cancelWork(workId: String) {
+        if (workId.isNotBlank()) {
+            WorkManager.getInstance(context).cancelWorkById(UUID.fromString(workId))
+        }
+    }
     fun getAlerts(){
         alertStates.value=AlertUiState.Loading
         viewModelScope.launch {

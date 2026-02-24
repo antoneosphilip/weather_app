@@ -13,5 +13,6 @@ import kotlinx.serialization.Serializable
         val endTime: Long? = null,
         val type: String,
         val label: String? = null,
-        var isActive: Boolean = true
+        var isActive: Boolean = true,
+        val workId: String = ""
     )
