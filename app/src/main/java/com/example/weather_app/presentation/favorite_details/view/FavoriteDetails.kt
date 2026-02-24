@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.weather_app.Screens
+import com.example.weather_app.data.WeatherRepo
 import com.example.weather_app.presentation.components.CustomLoading
 import com.example.weather_app.presentation.components.ErrorMessage
 import com.example.weather_app.presentation.favorite.viewModel.FavoriteUiState
@@ -51,10 +52,10 @@ import com.example.weather_app.presentation.home.view.WeatherComponent
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun FavoritesDetailsScreen(lat:Double,  long:Double) {
+fun FavoritesDetailsScreen(lat:Double,  long:Double,weatherRepo: WeatherRepo) {
     val context= LocalContext.current
     val favoriteDetailsViewModel: FavoriteDetailsViewModel = viewModel(
-        factory = FavoriteDetailsViewModelFactory(context,lat,long)
+        factory = FavoriteDetailsViewModelFactory(context,lat,long,weatherRepo)
     )
     val scrollState = rememberScrollState()
 

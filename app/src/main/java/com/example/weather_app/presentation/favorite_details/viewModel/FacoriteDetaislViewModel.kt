@@ -13,9 +13,8 @@ import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
-class FavoriteDetailsViewModel(val context: Context,val lat:Double,val long:Double) : ViewModel() {
+class FavoriteDetailsViewModel(val context: Context,val lat:Double,val long:Double,private val weatherRepo: WeatherRepo ) : ViewModel() {
 
-    private val weatherRepo: WeatherRepo = WeatherRepo(context)
 
 
     var favoriteStates = mutableStateOf<FavoriteDetailsUiState>(FavoriteDetailsUiState.Loading)
@@ -69,12 +68,13 @@ class FavoriteDetailsViewModel(val context: Context,val lat:Double,val long:Doub
     }
 }
 
-class FavoriteDetailsViewModelFactory(
-    private val context: Context,
-    private val lat:Double,
-    private val long:Double
-) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return FavoriteDetailsViewModel(context,lat,long) as T
+    class FavoriteDetailsViewModelFactory(
+        private val context: Context,
+        private val lat:Double,
+        private val long:Double,
+        private val weatherRepo: WeatherRepo
+    ) : ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            return FavoriteDetailsViewModel(context,lat,long,weatherRepo) as T
+        }
     }
-}

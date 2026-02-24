@@ -90,5 +90,6 @@ dependencies {
     ksp("androidx.room:room-compiler:2.6.1")
     implementation("androidx.work:work-runtime-ktx:2.9.0")
     implementation("androidx.lifecycle:lifecycle-process:2.7.0")
-
+    androidTestImplementation ("androidx.arch.core:core-testing:2.2.0")
+    testImplementation ("androidx.arch.core:core-testing:2.2.0")
 }

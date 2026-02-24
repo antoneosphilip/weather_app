@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.weather_app.MyApplication
 import com.example.weather_app.data.alert.model.AlertModel
 import com.example.weather_app.presentation.alert.viewModel.AlertUiState
 import com.example.weather_app.presentation.components.CustomLoading
@@ -49,7 +50,9 @@ import com.example.weather_app.ui.theme.primary
 fun AlertsScreen(nav: NavHostController) {
     val context = LocalContext.current
 
-    val viewModel: AlertsViewModel = viewModel(factory = AlertViewModelFactory(context))
+
+    val application=context.applicationContext as MyApplication
+    val viewModel: AlertsViewModel = viewModel(factory =application.appContainer.alertViewModelFactory)
 
     val showDialog by viewModel.showDialog.collectAsState()
     val startTime by viewModel.startTime.collectAsState()

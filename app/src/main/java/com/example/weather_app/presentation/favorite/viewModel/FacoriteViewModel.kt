@@ -16,8 +16,7 @@ import com.example.weather_app.presentation.setting.viewModel.SettingViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
-class FavoriteViewModel(val context: Context) :ViewModel(){
-    private val weatherRepo: WeatherRepo = WeatherRepo(context)
+class FavoriteViewModel(val context: Context,private val weatherRepo: WeatherRepo) :ViewModel(){
      var favoriteStates= mutableStateOf<FavoriteUiState>(FavoriteUiState.Loading)
         private set
 
@@ -56,9 +55,10 @@ class FavoriteViewModel(val context: Context) :ViewModel(){
 }
 class FavoriteViewModelFactory(
     private val context: Context,
+    private val weatherRepo: WeatherRepo
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return FavoriteViewModel(context) as T
+        return FavoriteViewModel(context,weatherRepo) as T
 
     }
 }
