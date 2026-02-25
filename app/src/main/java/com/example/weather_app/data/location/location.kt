@@ -1,143 +1,75 @@
 import android.Manifest
-import android.app.Activity
+import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.IntentSender
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.location.LocationManager
-import android.os.Looper
-import androidx.activity.result.IntentSenderRequest
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.common.api.ResolvableApiException
-import com.google.android.gms.location.*
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.LocationSettingsRequest
+import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.tasks.Task
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withContext
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
+import kotlinx.coroutines.tasks.await
 
 class LocationProvider(private val context: Context) {
-    private val locationManager: LocationManager =
-        context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
-    private val fusedLocationClient: FusedLocationProviderClient =
-        LocationServices.getFusedLocationProviderClient(context)
+    private val fusedClient = LocationServices.getFusedLocationProviderClient(context)
 
-    suspend fun getDeviceLocation(): LatLng? = withContext(Dispatchers.IO) {
-        if (!hasLocationPermission()) {
-            return@withContext null
-        }
+    fun hasPermission(): Boolean {
+        return ActivityCompat.checkSelfPermission(
+            context, Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+    }
 
-        if (!isLocationEnabled()) {
-            return@withContext null
-        }
-
-        try {
-            var location = fusedLocationClient.lastLocation.await()
-
-            if (location == null) {
-                location = requestNewLocation()
-            }
-
+    @SuppressLint("MissingPermission")
+    suspend fun getLocation(): LatLng? {
+        if (!hasPermission()) return null
+        return try {
+            val location = fusedClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null).await()
             location?.let { LatLng(it.latitude, it.longitude) }
         } catch (e: Exception) {
             null
         }
     }
 
-    private suspend fun requestNewLocation(): android.location.Location? =
-        suspendCancellableCoroutine { continuation ->
-            if (!hasLocationPermission()) {
-                continuation.resume(null)
-                return@suspendCancellableCoroutine
-            }
-
-            val locationRequest = LocationRequest.Builder(
-                Priority.PRIORITY_HIGH_ACCURACY, 5000
-            ).setMaxUpdates(1).build()
-
-            val locationCallback = object : LocationCallback() {
-                override fun onLocationResult(result: LocationResult) {
-                    fusedLocationClient.removeLocationUpdates(this)
-                    continuation.resume(result.lastLocation)
-                }
-            }
-
-            try {
-                fusedLocationClient.requestLocationUpdates(
-                    locationRequest,
-                    locationCallback,
-                    Looper.getMainLooper()
-                )
-            } catch (e: SecurityException) {
-                continuation.resume(null)
-            }
-
-            continuation.invokeOnCancellation {
-                fusedLocationClient.removeLocationUpdates(locationCallback)
-            }
-        }
-
-    fun hasLocationPermission(): Boolean {
-        return ActivityCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED ||
-                ActivityCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-    }
-
-    fun isLocationEnabled(): Boolean {
-        val gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-        val networkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
-        return gpsEnabled || networkEnabled
-    }
-
-    fun requestLocationSettings(
-        activity: Activity,
+    fun checkLocationSettings(
+        activity: android.app.Activity,
         onSuccess: () -> Unit,
-        onFailure: (IntentSenderRequest) -> Unit
+        onResolvable: (ResolvableApiException) -> Unit,
+        onFailed: () -> Unit
     ) {
-        val locationRequest = LocationRequest.Builder(
-            Priority.PRIORITY_HIGH_ACCURACY, 10000
-        ).build()
+        val request = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000).build()
+        val settingsRequest = LocationSettingsRequest.Builder().addLocationRequest(request).build()
 
-        val builder = LocationSettingsRequest.Builder()
-            .addLocationRequest(locationRequest)
-            .setAlwaysShow(true)
-
-        val client = LocationServices.getSettingsClient(activity)
-        val task = client.checkLocationSettings(builder.build())
-
-        task.addOnSuccessListener {
-            onSuccess()
-        }
-
-        task.addOnFailureListener { exception ->
-            if (exception is ResolvableApiException) {
-                try {
-                    val intentSenderRequest = IntentSenderRequest.Builder(
-                        exception.resolution
-                    ).build()
-                    onFailure(intentSenderRequest)
-                } catch (sendEx: IntentSender.SendIntentException) {
-                }
+        LocationServices.getSettingsClient(activity)
+            .checkLocationSettings(settingsRequest)
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { exception ->
+                if (exception is ResolvableApiException) onResolvable(exception)
+                else onFailed()
             }
-        }
     }
 
-    private suspend fun <T> Task<T>.await(): T = suspendCancellableCoroutine { continuation ->
-        addOnSuccessListener { result ->
-            continuation.resume(result)
-        }
-        addOnFailureListener { exception ->
-            continuation.resumeWithException(exception)
-        }
-        addOnCanceledListener {
-            continuation.cancel()
+    fun registerLocationReceiver(onLocationEnabled: () -> Unit): BroadcastReceiver? {
+        return try {
+            val receiver = object : BroadcastReceiver() {
+                override fun onReceive(ctx: Context, intent: Intent) {
+                    if (intent.action == LocationManager.PROVIDERS_CHANGED_ACTION) {
+                        val locationManager = ctx.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+                        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                            onLocationEnabled()
+                        }
+                    }
+                }
+            }
+            context.registerReceiver(receiver, IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION))
+            receiver
+        } catch (e: Exception) {
+            null
         }
     }
 }

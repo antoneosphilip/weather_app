@@ -1,14 +1,14 @@
 package com.example.weather_app.presentation.home.view
 
-import WeatherIcon
-import android.Manifest
+import android.app.Activity
 import android.os.Build
-import android.util.Log
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -18,7 +18,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import com.example.weather_app.LocationSource
 import com.example.weather_app.Screens
@@ -26,10 +28,6 @@ import com.example.weather_app.presentation.components.CustomLoading
 import com.example.weather_app.presentation.components.ErrorMessage
 import com.example.weather_app.presentation.home.viewModel.HomeUiState
 import com.example.weather_app.presentation.home.viewModel.HomeViewModel
-import com.example.weather_app.presentation.home.viewModel.HomeViewModelFactory
-import com.example.weather_app.presentation.setting.viewModel.SettingViewModel
-import com.example.weather_app.presentation.setting.viewModel.SettingViewModelFactory
-import kotlin.math.roundToInt
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -38,7 +36,62 @@ fun HomeScreen(
     viewModel: HomeViewModel
 ) {
     val scrollState = rememberScrollState()
+    val context = LocalContext.current
+    val activity = context as Activity
 
+    val locationSettingsLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartIntentSenderForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            viewModel.retryLocation()
+        } else {
+            viewModel.onUserDeniedLocation()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.showLocationDialog.collect {
+            viewModel.locationProvider.checkLocationSettings(
+                activity = activity,
+                onSuccess = { viewModel.retryLocation() },
+                onResolvable = { exception ->
+                    locationSettingsLauncher.launch(
+                        IntentSenderRequest.Builder(exception.resolution).build()
+                    )
+                },
+                onFailed = { viewModel.showLocationError() }
+            )
+        }
+    }
+
+    DisposableEffect(Unit) {
+        val receiver = viewModel.locationProvider.registerLocationReceiver {
+            viewModel.retryLocation()
+        }
+        viewModel.requestLocationCheck()
+        onDispose {
+            receiver?.let {
+                try {
+                    context.unregisterReceiver(it)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                if (!viewModel.locationProvider.hasPermission()) {
+                    viewModel.showLocationError()
+                }
+
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     LaunchedEffect(viewModel.shouldNavigateToMap.value) {
         if (viewModel.shouldNavigateToMap.value) {
@@ -47,52 +100,37 @@ fun HomeScreen(
             }
             viewModel.onNavigatedToMap()
         }
-//        else{
-//            Log.i("TAG", "HomeScreen: "+viewModel.isNavBefore.value)
-//            if(viewModel.isNavBefore.value){
-//                navController.popBackStack()
-//                viewModel.isNavBefore.value = false
-//            }
-//        }
     }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.primary)
     ) {
         when (val state = viewModel.uiState.value) {
+            is HomeUiState.Loading -> CustomLoading()
 
-            is HomeUiState.Loading -> {
-                CustomLoading()
-            }
-
-            is HomeUiState.Error -> {
-                ErrorMessage(
-                    error = state.message,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
+            is HomeUiState.Error -> ErrorMessage(
+                error = state.message,
+                modifier = Modifier.align(Alignment.Center)
+            )
 
             is HomeUiState.Success -> {
-                val weather = state.currentWeather
-                val hourlyForecast = state.hourlyForecast
-                val dailyForecast = state.dailyForecast
-
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(scrollState)
                         .padding(16.dp)
                 ) {
-                   WeatherComponent(
-                       weather = weather,
-                       hourlyForecast = hourlyForecast,
-                       dailyForecast = dailyForecast,
-                       temperatureUnit = viewModel.temp.value,
-                       onLocationClick = {
-                           navController.navigate(Screens.LocationScreen)
-                       }
-                   )
+                    WeatherComponent(
+                        weather = state.currentWeather,
+                        hourlyForecast = state.hourlyForecast,
+                        dailyForecast = state.dailyForecast,
+                        temperatureUnit = viewModel.temp.value,
+                        onLocationClick = {
+                            navController.navigate(Screens.LocationScreen(LocationSource.HOME))
+                        }
+                    )
                 }
             }
         }
