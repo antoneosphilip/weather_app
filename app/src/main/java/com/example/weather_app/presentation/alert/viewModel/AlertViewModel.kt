@@ -23,7 +23,7 @@ import java.util.UUID
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
 
-class AlertsViewModel(val context: Context) : ViewModel() {
+class AlertsViewModel(val context: Context,private val weatherRepo:WeatherRepo) : ViewModel() {
 
     private val _showDialog = MutableStateFlow(false)
     val showDialog = _showDialog.asStateFlow()
@@ -43,7 +43,6 @@ class AlertsViewModel(val context: Context) : ViewModel() {
      var alertStates = mutableStateOf<AlertUiState>(AlertUiState.Loading)
          private set
 
-    private val weatherRepo=WeatherRepo(context)
 
     init {
         getAlerts()
@@ -213,9 +212,10 @@ class AlertsViewModel(val context: Context) : ViewModel() {
 }
 class AlertViewModelFactory(
     private val context: Context,
+    private val weatherRepo: WeatherRepo
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return AlertsViewModel(context) as T
+        return AlertsViewModel(context,weatherRepo) as T
 
     }
 }

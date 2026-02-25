@@ -19,7 +19,7 @@ import com.example.weather_app.data.weather.model.WeatherResponse
 import com.example.weather_app.prefs.SharedPreferencesHelper
 import kotlin.math.log
 
-class AlertWorker(context: Context, params: WorkerParameters)
+class AlertWorker(context: Context, params: WorkerParameters,)
     : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
@@ -27,8 +27,7 @@ class AlertWorker(context: Context, params: WorkerParameters)
         val isNotification = inputData.getBoolean("IS_NOTIFICATION", false)
         val now = System.currentTimeMillis()
         val alertId = inputData.getLong("ALERT_ID", -1L)
-
-        val weatherRepo=WeatherRepo(applicationContext)
+         val weatherRepo= (applicationContext as MyApplication).appContainer.weatherRepo
         Log.i("AlertWorker", "doWork fired! isNotification=$isNotification")
 
         if (now <= endTime) {

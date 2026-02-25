@@ -11,13 +11,15 @@ import com.example.weather_app.data.weather.model.DailyForecastResponse
 import com.example.weather_app.data.weather.model.SettingModel
 import com.example.weather_app.data.weather.model.WeatherForecastResponse
 import com.example.weather_app.data.weather.model.WeatherResponse
+import com.example.weather_app.db.DataBase
 import kotlinx.coroutines.flow.Flow
 
-class WeatherRepo(context: Context) {
-    private val weatherRemoteData = WeatherRemoteDataSource()
-    private val weatherLocalData = WeatherLocalDataBase(context)
-    private val favoriteLocalDataBase=FavoriteLocalDataBase(context)
-    private val alertLocalDataBase= AlertLocalDataBase(context)
+class WeatherRepo(
+    private val weatherLocalData: WeatherLocalDataBase,
+    private val favoriteLocalDataBase: FavoriteLocalDataBase,
+    private val alertLocalDataBase: AlertLocalDataBase,
+    private val weatherRemoteData: WeatherRemoteDataSource
+) {
 
     suspend fun getWeather(
         lat: Double,

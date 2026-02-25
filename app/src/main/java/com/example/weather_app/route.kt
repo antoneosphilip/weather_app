@@ -26,6 +26,7 @@ import com.google.android.gms.maps.model.LatLng
 import kotlinx.serialization.Serializable
 
 sealed class Screens{
+
     @Serializable
     object HomeScreen :Screens()
     @Serializable
@@ -55,17 +56,18 @@ enum class LocationSource {
 @Composable
 fun MyApp(nav: NavHostController,) {
     val context = LocalContext.current
+    val appContainer = (context.applicationContext as MyApplication).appContainer
 
     val settingViewModel: SettingViewModel = viewModel(
-        factory = SettingViewModelFactory(context)
+        factory = appContainer.settingViewModelFactory
     )
 
     val homeViewModel: HomeViewModel = viewModel(
-        factory = HomeViewModelFactory(context,settingViewModel)
+        factory = appContainer.homeViewModelFactory
     )
 
     val favoriteViewModel: FavoriteViewModel = viewModel(
-        factory = FavoriteViewModelFactory(context)
+        factory = appContainer.favoriteViewModelFactory
     )
 
 
@@ -93,7 +95,7 @@ fun MyApp(nav: NavHostController,) {
 
         composable<Screens.FavoriteDetails> { b ->
             val args = b.toRoute<Screens.FavoriteDetails>()
-            FavoritesDetailsScreen(args.lat, args.long)
+            FavoritesDetailsScreen(args.lat, args.long,appContainer.weatherRepo)
         }
         composable<Screens.LocationScreen> { backStackEntry ->
 

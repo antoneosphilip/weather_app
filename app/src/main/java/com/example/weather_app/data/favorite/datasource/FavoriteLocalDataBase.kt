@@ -6,9 +6,8 @@ import com.example.weather_app.data.favorite.model.LocationModel
 import com.example.weather_app.db.DataBase
 import kotlinx.coroutines.flow.Flow
 
-class FavoriteLocalDataBase (context: Context){
+class FavoriteLocalDataBase (private val favoriteDao: FavoriteDao ){
 
-    private val favoriteDao: FavoriteDao = DataBase.getInstance(context).getFavoriteDao()
 
     suspend fun saveLocation(locationModel: LocationModel) {
         favoriteDao.saveLocation(locationModel)

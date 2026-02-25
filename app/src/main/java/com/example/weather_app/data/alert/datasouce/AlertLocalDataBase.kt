@@ -5,8 +5,7 @@ import com.example.weather_app.data.alert.model.AlertModel
 import com.example.weather_app.db.DataBase
 import kotlinx.coroutines.flow.Flow
 
-class AlertLocalDataBase(val context: Context) {
-    private val alertDao=DataBase.getInstance(context).getAlertDao()
+class AlertLocalDataBase(val alertDao: AlertDao) {
 
     suspend fun saveAlert( alertMode: AlertModel):Long{
        return alertDao.saveAlert(alertMode)

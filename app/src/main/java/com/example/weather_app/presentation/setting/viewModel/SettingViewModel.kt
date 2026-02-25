@@ -11,9 +11,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class SettingViewModel(context: Context) : ViewModel() {
+class SettingViewModel(context: Context,private val weatherRepo: WeatherRepo) : ViewModel() {
 
-    private val weatherRepo = WeatherRepo(context)
 
     private val _selectedLanguage = MutableStateFlow("English")
     val selectedLanguage = _selectedLanguage.asStateFlow()
@@ -98,11 +97,11 @@ class SettingViewModel(context: Context) : ViewModel() {
     }
 }
 
-class SettingViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
+class SettingViewModelFactory(private val context: Context,private val weatherRepo: WeatherRepo) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(SettingViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return SettingViewModel(context) as T
+            return SettingViewModel(context,weatherRepo) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

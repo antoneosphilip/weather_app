@@ -19,11 +19,8 @@ import kotlinx.coroutines.launch
 
 @Suppress("UNREACHABLE_CODE")
 class HomeViewModel(
-    private val context: Context,
+    private val context: Context,private val weatherRepo: WeatherRepo
 ) : ViewModel() {
-
-    private val weatherRepo: WeatherRepo = WeatherRepo(context)
-
 
     val locationProvider: LocationProvider = LocationProvider(context)
 
@@ -131,12 +128,12 @@ class HomeViewModel(
 
 class HomeViewModelFactory(
     private val context: Context,
-    private val viewModel: SettingViewModel
+    private val weatherRepo: WeatherRepo
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(HomeViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return HomeViewModel(context) as T
+            return HomeViewModel(context,weatherRepo) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
