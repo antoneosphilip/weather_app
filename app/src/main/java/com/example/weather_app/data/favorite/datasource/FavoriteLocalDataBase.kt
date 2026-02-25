@@ -17,4 +17,9 @@ class FavoriteLocalDataBase (private val favoriteDao: FavoriteDao ){
        return favoriteDao.getLocation()
     }
 
+  suspend  fun deleteLocation(locationId:Int) {
+        return favoriteDao.deleteLocation(locationId)
+    }
+
+
 }

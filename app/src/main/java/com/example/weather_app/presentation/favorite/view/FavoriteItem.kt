@@ -1,7 +1,9 @@
 package com.example.weather_app.presentation.favorite.view
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,9 +12,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,9 +33,17 @@ import com.example.weather_app.data.favorite.model.LocationModel
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavController
 import com.example.weather_app.Screens
+import com.example.weather_app.presentation.favorite.viewModel.FavoriteViewModel
+import com.example.weather_app.ui.theme.primary
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun FavoriteItem(locationModel: LocationModel,nav:NavController) {
+fun FavoriteItem(
+    locationModel: LocationModel,
+    nav: NavController,
+    viewModel: FavoriteViewModel
+) {
+    var showDialog by remember { mutableStateOf(false) }
 
     Row(
         modifier = Modifier
@@ -39,11 +55,19 @@ fun FavoriteItem(locationModel: LocationModel,nav:NavController) {
                 color = Color.White.copy(alpha = 0.3f),
                 shape = RoundedCornerShape(50.dp)
             )
-            .clickable {
-                nav.navigate(Screens.FavoriteDetails(lat =locationModel.lat, long = locationModel.long))
-
-
-            }
+            .combinedClickable(
+                onClick = {
+                    nav.navigate(
+                        Screens.FavoriteDetails(
+                            lat = locationModel.lat,
+                            long = locationModel.long
+                        )
+                    )
+                },
+                onLongClick = {
+                    showDialog = true
+                }
+            )
             .padding(horizontal = 20.dp, vertical = 20.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -79,4 +103,51 @@ fun FavoriteItem(locationModel: LocationModel,nav:NavController) {
             tint = Color.White
         )
     }
+
+    DeleteLocationDialog(
+        show = showDialog,
+        onConfirm = {
+            viewModel.deleteLocation(locationModel.id)
+            showDialog = false
+        },
+        onDismiss = {
+            showDialog = false
+        }
+    )
+}
+@Composable
+fun DeleteLocationDialog(
+    show: Boolean,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    if (!show) return
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor =primary,
+        title = {
+            Text(
+                text = "Delete Location",
+                color = Color.White,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            Text(
+                text = "Are you sure you want to delete this location?",
+                color = Color.White
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text("Delete", color = Color.White)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel", color = Color.White)
+            }
+        }
+    )
 }

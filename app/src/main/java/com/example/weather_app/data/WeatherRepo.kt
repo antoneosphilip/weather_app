@@ -91,6 +91,10 @@ class WeatherRepo(
        return favoriteLocalDataBase.getLocation()
     }
 
+    suspend  fun deleteLocation(locationId:Int) {
+        return favoriteLocalDataBase.deleteLocation(locationId)
+    }
+
 
    suspend fun saveAlert(alertModel: AlertModel):Long{
        return alertLocalDataBase.saveAlert(alertModel)

@@ -34,6 +34,17 @@ class FavoriteViewModel(val context: Context,private val weatherRepo: WeatherRep
            }
        }
     }
+    fun deleteLocation(locationId:Int){
+        viewModelScope.launch {
+            try{
+                weatherRepo.deleteLocation(locationId)
+                Log.i("Saveee", "saveLocation: ")
+
+            }catch (e:Exception){
+                favoriteStates.value=FavoriteUiState.Error(e.message.toString())
+            }
+        }
+    }
     fun getLocation(){
         favoriteStates.value=FavoriteUiState.Loading
         viewModelScope.launch {

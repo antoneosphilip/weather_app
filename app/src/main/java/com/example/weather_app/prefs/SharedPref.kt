@@ -6,7 +6,7 @@ import android.content.SharedPreferences
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
-class SharedPreferencesHelper private constructor(context: Context) {
+class SharedPreferencesHelper private constructor(context: Context):PreferenceStorage {
 
     private val prefs: SharedPreferences =
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -28,7 +28,7 @@ class SharedPreferencesHelper private constructor(context: Context) {
         }
     }
 
-    fun <T> save(key: String, value: T) {
+   override fun <T> save(key: String, value: T) {
         val editor = prefs.edit()
         when (value) {
             is String -> editor.putString(key, value)
@@ -42,16 +42,16 @@ class SharedPreferencesHelper private constructor(context: Context) {
         editor.apply()
     }
 
-    fun getString(key: String, defaultValue: String = ""): String {
+    override fun getString(key: String, defaultValue: String): String {
         return prefs.getString(key, defaultValue) ?: defaultValue
     }
 
-    fun getInt(key: String, defaultValue: Int = 0): Int {
+    override fun getInt(key: String, defaultValue: Int ): Int {
         return prefs.getInt(key, defaultValue)
     }
 
 
-    fun getLong(key: String, defaultValue: Long = 0L): Long {
+    override fun getLong(key: String, defaultValue: Long ): Long {
         return prefs.getLong(key, defaultValue)
     }
 
