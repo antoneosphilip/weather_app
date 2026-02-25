@@ -14,8 +14,7 @@ import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.example.weather_app.constant.Constants
-import com.example.weather_app.data.WeatherRepo
-import com.example.weather_app.data.weather.model.WeatherResponse
+
 import com.example.weather_app.prefs.SharedPreferencesHelper
 import kotlin.math.log
 
