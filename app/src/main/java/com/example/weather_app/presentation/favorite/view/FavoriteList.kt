@@ -7,16 +7,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.weather_app.data.favorite.model.LocationModel
+import com.example.weather_app.presentation.favorite.viewModel.FavoriteViewModel
 
 @Composable
-fun FavoriteList(favoriteList:List<LocationModel>,nav:NavController){
+fun FavoriteList(favoriteList:List<LocationModel>,nav:NavController,favoriteViewModel:FavoriteViewModel){
 
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
 
          items(favoriteList){
-                 locationModel-> FavoriteItem(locationModel=locationModel, nav = nav)
+                 locationModel-> FavoriteItem(locationModel=locationModel, nav = nav,favoriteViewModel)
          }
 
     }

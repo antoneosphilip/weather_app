@@ -7,6 +7,7 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import androidx.core.app.ActivityCompat
+import com.example.weather_app.data.location.ILocationProvider
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
@@ -15,18 +16,18 @@ import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.tasks.await
 
-class LocationProvider(private val context: Context) {
+class LocationProvider(private val context: Context): ILocationProvider {
 
     private val fusedClient = LocationServices.getFusedLocationProviderClient(context)
 
-    fun hasPermission(): Boolean {
+   override fun hasPermission(): Boolean {
         return ActivityCompat.checkSelfPermission(
             context, Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
     }
 
     @SuppressLint("MissingPermission")
-    suspend fun getLocation(): LatLng? {
+    override suspend fun getLocation(): LatLng? {
         if (!hasPermission()) return null
         return try {
             val location = fusedClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null).await()
@@ -36,7 +37,7 @@ class LocationProvider(private val context: Context) {
         }
     }
 
-    fun checkLocationSettings(
+    override fun checkLocationSettings(
         activity: android.app.Activity,
         onSuccess: () -> Unit,
         onResolvable: (ResolvableApiException) -> Unit,
@@ -54,7 +55,7 @@ class LocationProvider(private val context: Context) {
             }
     }
 
-    fun registerLocationReceiver(onLocationEnabled: () -> Unit): BroadcastReceiver? {
+    override fun registerLocationReceiver(onLocationEnabled: () -> Unit): BroadcastReceiver? {
         return try {
             val receiver = object : BroadcastReceiver() {
                 override fun onReceive(ctx: Context, intent: Intent) {

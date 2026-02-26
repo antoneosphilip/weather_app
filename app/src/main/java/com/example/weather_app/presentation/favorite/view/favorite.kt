@@ -75,7 +75,7 @@ fun FavoritesScreen(nav: NavHostController,favoriteViewModel:FavoriteViewModel) 
 
                     }
                     Spacer(modifier = Modifier.height(20.dp))
-                    FavoriteList(favoriteList = state.favoriteList, nav = nav)
+                    FavoriteList(favoriteList = state.favoriteList, nav = nav,favoriteViewModel)
                 }
             }
 

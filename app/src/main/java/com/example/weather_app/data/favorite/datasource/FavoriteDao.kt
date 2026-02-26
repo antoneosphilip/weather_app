@@ -18,7 +18,8 @@ interface FavoriteDao{
 
     @Query("SELECT * FROM location")
      fun getLocation():Flow<List<LocationModel>>
-
+    @Query("DELETE FROM location WHERE id = :id")
+    suspend fun deleteLocation(id: Int)
 }
 
 

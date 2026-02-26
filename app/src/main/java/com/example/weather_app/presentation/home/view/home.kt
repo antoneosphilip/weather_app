@@ -2,9 +2,7 @@ package com.example.weather_app.presentation.home.view
 
 import android.app.Activity
 import android.os.Build
-import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
@@ -43,7 +41,7 @@ fun HomeScreen(
         ActivityResultContracts.StartIntentSenderForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            viewModel.retryLocation()
+            viewModel.retryLocation(context)
         } else {
             viewModel.onUserDeniedLocation()
         }
@@ -53,7 +51,7 @@ fun HomeScreen(
         viewModel.showLocationDialog.collect {
             viewModel.locationProvider.checkLocationSettings(
                 activity = activity,
-                onSuccess = { viewModel.retryLocation() },
+                onSuccess = { viewModel.retryLocation(context) },
                 onResolvable = { exception ->
                     locationSettingsLauncher.launch(
                         IntentSenderRequest.Builder(exception.resolution).build()
@@ -66,7 +64,7 @@ fun HomeScreen(
 
     DisposableEffect(Unit) {
         val receiver = viewModel.locationProvider.registerLocationReceiver {
-            viewModel.retryLocation()
+            viewModel.retryLocation(context)
         }
         viewModel.requestLocationCheck()
         onDispose {
@@ -79,6 +77,7 @@ fun HomeScreen(
             }
         }
     }
+
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -86,20 +85,22 @@ fun HomeScreen(
                 if (!viewModel.locationProvider.hasPermission()) {
                     viewModel.showLocationError()
                 }
-
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    LaunchedEffect(viewModel.shouldNavigateToMap.value) {
-        if (viewModel.shouldNavigateToMap.value) {
-            navController.navigate(Screens.LocationScreen(LocationSource.HOME)) {
-                launchSingleTop = true
+    LaunchedEffect(Unit) {
+        snapshotFlow { viewModel.shouldNavigateToMap.value }
+            .collect { shouldNavigate ->
+                if (shouldNavigate) {
+                    navController.navigate(Screens.LocationScreen(LocationSource.HOME)) {
+                        launchSingleTop = true
+                    }
+                    viewModel.onNavigatedToMap()
+                }
             }
-            viewModel.onNavigatedToMap()
-        }
     }
 
     Box(
