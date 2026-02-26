@@ -11,7 +11,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import com.example.weather_app.LocationSource
+import com.example.weather_app.R
 import com.example.weather_app.presentation.home.viewModel.HomeViewModel
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -31,7 +33,7 @@ fun LocationPickerScreen(
     onLocationSelected: (Double, Double, String) -> Unit,
     onBack: () -> Unit,
     source: LocationSource
-    ) {
+) {
     val context = LocalContext.current
 
     var selectedPosition by remember {
@@ -41,21 +43,23 @@ fun LocationPickerScreen(
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(selectedPosition, 12f)
     }
-    LaunchedEffect(homeViewModel.shouldCloseMap.value&&source==LocationSource.HOME) {
+
+    LaunchedEffect(homeViewModel.shouldCloseMap.value && source == LocationSource.HOME) {
         if (homeViewModel.shouldCloseMap.value) {
             homeViewModel.onMapClosed()
             onBack()
         }
     }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Select Location", color = Color.White) },
+                title = { Text(stringResource(R.string.select_location), color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.back),
                             tint = Color.White
                         )
                     }
@@ -87,7 +91,7 @@ fun LocationPickerScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Check,
-                            contentDescription = "Confirm",
+                            contentDescription = stringResource(R.string.confirm),
                             tint = Color.White
                         )
                     }
@@ -109,7 +113,7 @@ fun LocationPickerScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.LocationOn,
-                        contentDescription = "My Location"
+                        contentDescription = stringResource(R.string.my_location)
                     )
                 }
             }
@@ -132,7 +136,7 @@ fun LocationPickerScreen(
             ) {
                 Marker(
                     state = MarkerState(position = selectedPosition),
-                    title = "Selected Location",
+                    title = stringResource(R.string.selected_location),
                     snippet = "Lat: ${selectedPosition.latitude}, Lng: ${selectedPosition.longitude}"
                 )
             }

@@ -2,9 +2,6 @@ package com.example.weather_app.presentation.alert.view
 
 import android.app.TimePickerDialog
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
-import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,13 +16,13 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.semantics.Role.Companion.Button
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.weather_app.R
 import com.example.weather_app.ui.theme.accent
 import com.example.weather_app.ui.theme.primary
 import com.example.weather_app.ui.theme.redCancel
@@ -54,13 +51,13 @@ fun NewAlertDialog(
             .padding(24.dp)
     ) {
         Text(
-            text = "New Alert",
+            text = stringResource(R.string.new_alert),
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
             color = white
         )
         Text(
-            text = "Set your weather notification window",
+            text = stringResource(R.string.alert_subtitle),
             fontSize = 13.sp,
             color = white.copy(alpha = 0.5f)
         )
@@ -68,7 +65,7 @@ fun NewAlertDialog(
         Spacer(modifier = Modifier.height(20.dp))
 
         TimePickerField(
-            label = if (startTime.isEmpty()) "Start time" else startTime,
+            label = if (startTime.isEmpty()) stringResource(R.string.start_time) else startTime,
             onClick = {
                 val cal = Calendar.getInstance()
                 TimePickerDialog(
@@ -88,7 +85,7 @@ fun NewAlertDialog(
         Spacer(modifier = Modifier.height(12.dp))
 
         TimePickerField(
-            label = if (endTime.isEmpty()) "End time" else endTime,
+            label = if (endTime.isEmpty()) stringResource(R.string.end_time) else endTime,
             onClick = {
                 val cal = Calendar.getInstance()
                 TimePickerDialog(
@@ -108,7 +105,7 @@ fun NewAlertDialog(
         Spacer(modifier = Modifier.height(20.dp))
 
         Text(
-            text = "Notify me by",
+            text = stringResource(R.string.notify_me_by),
             fontSize = 14.sp,
             color = white.copy(alpha = 0.7f)
         )
@@ -117,12 +114,12 @@ fun NewAlertDialog(
 
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             NotifyTypeButton(
-                label = "Alarm",
+                label = stringResource(R.string.alarm),
                 selected = selectedType == "Alarm",
                 onClick = { onTypeChange("Alarm") }
             )
             NotifyTypeButton(
-                label = "Notification",
+                label = stringResource(R.string.notification),
                 selected = selectedType == "Notification",
                 onClick = { onTypeChange("Notification") }
             )
@@ -142,7 +139,7 @@ fun NewAlertDialog(
                 border = androidx.compose.foundation.BorderStroke(1.5.dp, redCancel)
             ) {
                 Text(
-                    text = "Cancel",
+                    text = stringResource(R.string.cancel),
                     color = redCancel,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -155,7 +152,7 @@ fun NewAlertDialog(
                 colors = ButtonDefaults.buttonColors(containerColor = accent)
             ) {
                 Text(
-                    text = "Save",
+                    text = stringResource(R.string.save),
                     color = primary,
                     fontWeight = FontWeight.Bold
                 )

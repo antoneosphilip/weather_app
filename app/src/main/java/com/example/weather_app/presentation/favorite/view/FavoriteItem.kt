@@ -2,7 +2,6 @@ package com.example.weather_app.presentation.favorite.view
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -25,14 +24,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.weather_app.data.favorite.model.LocationModel
-
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavController
+import com.example.weather_app.R
 import com.example.weather_app.Screens
+import com.example.weather_app.data.favorite.model.LocationModel
 import com.example.weather_app.presentation.favorite.viewModel.FavoriteViewModel
 import com.example.weather_app.ui.theme.primary
 
@@ -76,7 +76,6 @@ fun FavoriteItem(
             modifier = Modifier.weight(1f),
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             Text(
                 text = locationModel.location.extractCountry(),
                 color = Color.White,
@@ -99,7 +98,7 @@ fun FavoriteItem(
 
         Icon(
             imageVector = Icons.Default.KeyboardArrowRight,
-            contentDescription = "arrow",
+            contentDescription = null,
             tint = Color.White
         )
     }
@@ -115,6 +114,7 @@ fun FavoriteItem(
         }
     )
 }
+
 @Composable
 fun DeleteLocationDialog(
     show: Boolean,
@@ -125,28 +125,28 @@ fun DeleteLocationDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor =primary,
+        containerColor = primary,
         title = {
             Text(
-                text = "Delete Location",
+                text = stringResource(R.string.delete_location),
                 color = Color.White,
                 fontWeight = FontWeight.Bold
             )
         },
         text = {
             Text(
-                text = "Are you sure you want to delete this location?",
+                text = stringResource(R.string.delete_location_confirm),
                 color = Color.White
             )
         },
         confirmButton = {
             TextButton(onClick = onConfirm) {
-                Text("Delete", color = Color.White)
+                Text(stringResource(R.string.delete), color = Color.White)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel", color = Color.White)
+                Text(stringResource(R.string.cancel), color = Color.White)
             }
         }
     )

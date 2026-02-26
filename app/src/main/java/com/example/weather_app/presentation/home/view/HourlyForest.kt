@@ -23,9 +23,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.weather_app.R
 import com.example.weather_app.data.weather.model.ForecastItem
 import com.example.weather_app.data.weather.model.WeatherForecastResponse
 import kotlin.math.roundToInt
@@ -35,7 +37,7 @@ import kotlin.math.roundToInt
 fun HourlyForecast(hourlyData: WeatherForecastResponse) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
-            text = "Hourly Forecast",
+            text = stringResource(R.string.hourly_forecast),
             color = Color.White,
             fontSize = 18.sp,
             fontWeight = FontWeight.SemiBold
@@ -79,7 +81,7 @@ fun HourlyForecastCard(forecastItem: ForecastItem) {
             )
 
             WeatherIcon(
-                iconCode = forecastItem.weather.firstOrNull()?.icon?:"",
+                iconCode = forecastItem.weather.firstOrNull()?.icon ?: "",
                 modifier = Modifier.size(40.dp)
             )
 

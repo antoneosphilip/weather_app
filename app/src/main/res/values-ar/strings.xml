@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="my_alerts">تنبيهاتي</string>
+    <string name="active_alerts">%d تنبيه نشط</string>
+    <string name="active">نشط</string>
+    <string name="inactive">غير نشط</string>
+    <string name="delete_alert">حذف التنبيه</string>
+    <string name="delete_alert_confirm">هل أنت متأكد من حذف هذا التنبيه؟</string>
+    <string name="delete">حذف</string>
+    <string name="cancel">إلغاء</string>
+
+    <string name="new_alert">تنبيه جديد</string>
+    <string name="alert_subtitle">حدد نافذة إشعار الطقس</string>
+    <string name="start_time">وقت البداية</string>
+    <string name="end_time">وقت النهاية</string>
+    <string name="notify_me_by">إشعاري عن طريق</string>
+    <string name="alarm">منبه</string>
+    <string name="notification">إشعار</string>
+    <string name="save">حفظ</string>
+
+    <string name="favorites">المفضلة</string>
+    <string name="delete_location">حذف الموقع</string>
+    <string name="delete_location_confirm">هل أنت متأكد من حذف هذا الموقع؟</string>
+
+    <string name="hourly_forecast">التوقعات بالساعة</string>
+    <string name="daily_forecast">توقعات 7 أيام</string>
+    <string name="humidity">الرطوبة</string>
+    <string name="wind_speed">سرعة الرياح</string>
+    <string name="pressure">الضغط الجوي</string>
+    <string name="clouds">الغيوم</string>
+
+    <string name="select_location">اختر الموقع</string>
+    <string name="selected_location">الموقع المختار</string>
+    <string name="my_location">موقعي</string>
+
+    <string name="settings">الإعدادات</string>
+    <string name="location_settings">إعدادات الموقع</string>
+    <string name="gps">GPS</string>
+    <string name="manual">يدوي</string>
+    <string name="temperature_unit">وحدة الحرارة</string>
+    <string name="celsius">مئوية (°C)</string>
+    <string name="fahrenheit">فهرنهايت (°F)</string>
+    <string name="kelvin">كلفن (K)</string>
+    <string name="wind_speed_unit">وحدة سرعة الرياح</string>
+    <string name="meter_per_sec">متر/ثانية</string>
+    <string name="mile_per_hour">ميل/ساعة</string>
+    <string name="language">اللغة</string>
+    <string name="english">الإنجليزية</string>
+    <string name="arabic">العربية</string>
+
+    <string name="weather_alert_thunderstorm">⛈️ تحذير عاصفة رعدية! ابق في المنزل.</string>
+    <string name="weather_alert_drizzle">🌦️ رذاذ متوقع. خذ معك مظلة!</string>
+    <string name="weather_alert_rain">🌧️ تحذير أمطار! الطرق قد تكون زلقة.</string>
+    <string name="weather_alert_freezing_rain">🧊 أمطار متجمدة! خطر شديد.</string>
+    <string name="weather_alert_heavy_shower">🌧️ أمطار غزيرة! توقع فيضانات.</string>
+    <string name="weather_alert_snow">❄️ تحذير ثلوج! كن بأمان.</string>
+    <string name="weather_alert_low_visibility">🌫️ رؤية ضعيفة! قد بتأن.</string>
+    <string name="weather_alert_clear">☀️ سماء صافية! طقس رائع اليوم.</string>
+    <string name="weather_alert_cloudy">☁️ طقس غائم متوقع.</string>
+    <string name="weather_alert_default">🌤️ تابع تحديثات الطقس.</string>
+
+    <string name="notification_title">⛈️ تنبيه طقس</string>
+    <string name="notification_channel_name">تنبيهات الطقس</string>
+    <string name="dismiss">إغلاق</string>
+    <string name="back">رجوع</string>
+    <string name="confirm">تأكيد</string>
+    <string name="nav_home">الرئيسية</string>
+    <string name="nav_favorites">المفضلة</string>
+    <string name="nav_alerts">التنبيهات</string>
+    <string name="nav_settings">الإعدادات</string>
+</resources>

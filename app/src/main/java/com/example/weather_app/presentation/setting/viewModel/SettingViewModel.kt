@@ -11,65 +11,51 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class SettingViewModel(context: Context,private val weatherRepo: WeatherRepo) : ViewModel() {
 
+class SettingViewModel(context: Context, private val weatherRepo: WeatherRepo) : ViewModel() {
 
-    private val _selectedLanguage = MutableStateFlow("English")
+    private val _selectedLanguage = MutableStateFlow("en")
     val selectedLanguage = _selectedLanguage.asStateFlow()
 
     private val _selectedLocation = MutableStateFlow("GPS")
     val selectedLocation = _selectedLocation.asStateFlow()
 
-    private val _selectedTemperature = MutableStateFlow("Celsius (°C)")
+    private val _selectedTemperature = MutableStateFlow("metric")
     val selectedTemperature = _selectedTemperature.asStateFlow()
 
-    private val _selectedWindSpeed = MutableStateFlow("Meter/Sec")
+    private val _selectedWindSpeed = MutableStateFlow("meter")
     val selectedWindSpeed = _selectedWindSpeed.asStateFlow()
 
     init {
         viewModelScope.launch {
             val settings = weatherRepo.getSetting()
             if (settings != null) {
-
-                _selectedLanguage.value = when (settings.languageCode) {
-                    "ar" -> "Arabic"
-                    else -> "English"
-                }
-
-                _selectedTemperature.value = when (settings.temperatureUnit) {
-                    "imperial" -> "Fahrenheit (°F)"
-                    "standard" -> "Kelvin (K)"
-                    else -> "Celsius (°C)"
-                }
+                _selectedLanguage.value = settings.languageCode
+                _selectedTemperature.value = settings.temperatureUnit
                 _selectedLocation.value = settings.location
-
-                _selectedWindSpeed.value = when (settings.windSpeedUnit) {
-                    "mile" -> "Mile/Hour"
-                    else -> "Meter/Sec"
-                }
-
+                _selectedWindSpeed.value = settings.windSpeedUnit
             }
         }
     }
 
-    fun changeLanguage(value: String) {
-        Log.d("SettingViewModel", "Changing language to $value")
-        _selectedLanguage.value = value
+    fun changeLanguage(code: String) {
+        Log.d("SettingViewModel", "Changing language to $code")
+        _selectedLanguage.value = code
         saveSettings()
     }
 
-    fun changeLocation(value: String) {
-        _selectedLocation.value = value
+    fun changeLocation(code: String) {
+        _selectedLocation.value = code
         saveSettings()
     }
 
-    fun changeTemperature(value: String) {
-        _selectedTemperature.value = value
+    fun changeTemperature(code: String) {
+        _selectedTemperature.value = code
         saveSettings()
     }
 
-    fun changeWindSpeed(value: String) {
-        _selectedWindSpeed.value = value
+    fun changeWindSpeed(code: String) {
+        _selectedWindSpeed.value = code
         saveSettings()
     }
 
@@ -78,30 +64,23 @@ class SettingViewModel(context: Context,private val weatherRepo: WeatherRepo) : 
             weatherRepo.insertSetting(
                 SettingModel(
                     location = _selectedLocation.value,
-                    languageCode = when (_selectedLanguage.value) {
-                        "Arabic" -> "ar"
-                        else -> "en"
-                    },
-                    temperatureUnit = when (_selectedTemperature.value) {
-                        "Fahrenheit (°F)" -> "imperial"
-                        "Kelvin (K)" -> "standard"
-                        else -> "metric"
-                    },
-                    windSpeedUnit = when (_selectedWindSpeed.value) {
-                        "Mile/Hour" -> "mile"
-                        else -> "meter"
-                    }
+                    languageCode = _selectedLanguage.value,
+                    temperatureUnit = _selectedTemperature.value,
+                    windSpeedUnit = _selectedWindSpeed.value
                 )
             )
         }
     }
 }
 
-class SettingViewModelFactory(private val context: Context,private val weatherRepo: WeatherRepo) : ViewModelProvider.Factory {
+class SettingViewModelFactory(
+    private val context: Context,
+    private val weatherRepo: WeatherRepo
+) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(SettingViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return SettingViewModel(context,weatherRepo) as T
+            return SettingViewModel(context, weatherRepo) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

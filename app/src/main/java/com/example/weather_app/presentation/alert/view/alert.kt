@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -38,6 +39,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.weather_app.MyApplication
+import com.example.weather_app.R
 import com.example.weather_app.data.alert.model.AlertModel
 import com.example.weather_app.presentation.alert.viewModel.AlertUiState
 import com.example.weather_app.presentation.components.CustomLoading
@@ -50,15 +52,13 @@ import com.example.weather_app.ui.theme.primary
 fun AlertsScreen(nav: NavHostController) {
     val context = LocalContext.current
 
-
-    val application=context.applicationContext as MyApplication
-    val viewModel: AlertsViewModel = viewModel(factory =application.appContainer.alertViewModelFactory)
+    val application = context.applicationContext as MyApplication
+    val viewModel: AlertsViewModel = viewModel(factory = application.appContainer.alertViewModelFactory)
 
     val showDialog by viewModel.showDialog.collectAsState()
     val startTime by viewModel.startTime.collectAsState()
     val endTime by viewModel.endTime.collectAsState()
     val selectedType by viewModel.selectedType.collectAsState()
-
 
     Box(
         modifier = Modifier
@@ -88,13 +88,14 @@ fun AlertsScreen(nav: NavHostController) {
                     ) {
                         Column {
                             Text(
-                                text = "My Alerts",
+                                text = stringResource(R.string.my_alerts),
                                 fontSize = 24.sp,
                                 color = White,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                text = "${state.alertList.count { it.isActive }} active alerts",                                fontSize = 14.sp,
+                                text = stringResource(R.string.active_alerts, state.alertList.count { it.isActive }),
+                                fontSize = 14.sp,
                                 color = White.copy(alpha = 0.5f)
                             )
                         }
@@ -189,7 +190,4 @@ fun AlertsScreen(nav: NavHostController) {
             }
         }
     }
-
 }
-
-

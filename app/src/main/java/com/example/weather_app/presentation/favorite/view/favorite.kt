@@ -17,9 +17,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -29,22 +26,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.weather_app.LocationSource
+import com.example.weather_app.R
 import com.example.weather_app.Screens
 import com.example.weather_app.presentation.components.CustomLoading
 import com.example.weather_app.presentation.components.ErrorMessage
 import com.example.weather_app.presentation.favorite.viewModel.FavoriteUiState
 import com.example.weather_app.presentation.favorite.viewModel.FavoriteViewModel
-import com.example.weather_app.presentation.favorite.viewModel.FavoriteViewModelFactory
 
 @Composable
-fun FavoritesScreen(nav: NavHostController,favoriteViewModel:FavoriteViewModel) {
-    val context= LocalContext.current
+fun FavoritesScreen(nav: NavHostController, favoriteViewModel: FavoriteViewModel) {
+    val context = LocalContext.current
 
     Box(
         modifier = Modifier
@@ -52,7 +49,7 @@ fun FavoritesScreen(nav: NavHostController,favoriteViewModel:FavoriteViewModel) 
             .background(MaterialTheme.colorScheme.primary)
     ) {
         Column {
-            when(val state=favoriteViewModel.favoriteStates.value){
+            when (val state = favoriteViewModel.favoriteStates.value) {
                 is FavoriteUiState.Error -> {
                     ErrorMessage(error = state.message)
                 }
@@ -63,22 +60,19 @@ fun FavoritesScreen(nav: NavHostController,favoriteViewModel:FavoriteViewModel) 
 
                 is FavoriteUiState.Success -> {
                     Column(
-                        modifier = Modifier
-                            .padding(top = 30.dp, start = 30.dp)
+                        modifier = Modifier.padding(top = 30.dp, start = 30.dp)
                     ) {
                         Text(
-                            text = "Favorites",
+                            text = stringResource(R.string.favorites),
                             fontSize = 24.sp,
                             color = Color.White,
                             fontWeight = FontWeight.Bold
                         )
-
                     }
                     Spacer(modifier = Modifier.height(20.dp))
-                    FavoriteList(favoriteList = state.favoriteList, nav = nav,favoriteViewModel)
+                    FavoriteList(favoriteList = state.favoriteList, nav = nav, favoriteViewModel)
                 }
             }
-
         }
 
         Box(
@@ -97,11 +91,10 @@ fun FavoritesScreen(nav: NavHostController,favoriteViewModel:FavoriteViewModel) 
         ) {
             Icon(
                 imageVector = Icons.Default.Favorite,
-                contentDescription = "favorite",
+                contentDescription = stringResource(R.string.favorites),
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(28.dp)
             )
         }
-
     }
 }

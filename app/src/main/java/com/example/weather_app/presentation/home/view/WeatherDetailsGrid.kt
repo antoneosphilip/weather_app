@@ -8,7 +8,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.weather_app.R
 import kotlin.math.roundToInt
 
 @Composable
@@ -28,13 +30,13 @@ fun WeatherDetailsGrid(
         ) {
             WeatherDetailCard(
                 icon = Icons.Default.LocationOn,
-                title = "Humidity",
+                title = stringResource(R.string.humidity),
                 value = "$humidity%",
                 modifier = Modifier.weight(1f)
             )
             WeatherDetailCard(
                 icon = Icons.Default.LocationOn,
-                title = "Wind Speed",
+                title = stringResource(R.string.wind_speed),
                 value = "${windSpeed.roundToInt()} m/s",
                 modifier = Modifier.weight(1f)
             )
@@ -46,13 +48,13 @@ fun WeatherDetailsGrid(
         ) {
             WeatherDetailCard(
                 icon = Icons.Default.LocationOn,
-                title = "Pressure",
+                title = stringResource(R.string.pressure),
                 value = "$pressure hPa",
                 modifier = Modifier.weight(1f)
             )
             WeatherDetailCard(
                 icon = Icons.Default.LocationOn,
-                title = "Clouds",
+                title = stringResource(R.string.clouds),
                 value = "$clouds%",
                 modifier = Modifier.weight(1f)
             )
