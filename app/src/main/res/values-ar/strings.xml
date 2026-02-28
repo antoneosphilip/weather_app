@@ -83,5 +83,8 @@
     <string name="no_internet_message">افتح الإنترنت لاستقبال تنبيه الطقس.</string>
     <string name="no_internet_channel_name">تنبيهات بدون إنترنت</string>
     <string name="offline_banner_alert">أنت غير متصل. سيتم إرسال تنبيهات الطقس عند عودة الاتصال.</string>
-
+    <string name="no_favorites_title">لا توجد مفضلة</string>
+    <string name="no_favorites_subtitle">أضف مواقعك المفضلة لتظهر هنا</string>
+    <string name="no_alerts_title">لا توجد تنبيهات</string>
+    <string name="no_alerts_subtitle">أضف تنبيهاً للحصول على إشعارات الطقس</string>
 </resources>

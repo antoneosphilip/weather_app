@@ -56,6 +56,7 @@ class HomeViewModel(
                         lastLocationSetting = it.location
                         shouldNavigateToMap.value = true
                         shouldCloseMap.value = false
+                        uiState.value=HomeUiState.Loading
                     } else {
                         if (it.location == "GPS") {
                             shouldCloseMap.value = true

@@ -26,17 +26,17 @@ class FavoriteViewModel(val context: Context,private val weatherRepo: WeatherRep
     init {
         getLocation()
     }
-    fun saveLocation(locationModel: LocationModel){
-       viewModelScope.launch {
-           try{
-               weatherRepo.saveLocation(locationModel)
-               favoriteStates.value=FavoriteUiState.SaveSuccess(locationModel)
-               Log.i("Saveee", "saveLocation: ")
-           }catch (e:Exception){
-               favoriteStates.value=FavoriteUiState.Error(e.message.toString())
+        fun saveLocation(locationModel: LocationModel){
+           viewModelScope.launch {
+               try{
+                   weatherRepo.saveLocation(locationModel)
+                   favoriteStates.value=FavoriteUiState.SaveSuccess(locationModel)
+                   Log.i("Saveee", "saveLocation: ")
+               }catch (e:Exception){
+                   favoriteStates.value=FavoriteUiState.Error(e.message.toString())
+               }
            }
-       }
-    }
+        }
     fun deleteLocation(locationId:Int){
         viewModelScope.launch {
             try{

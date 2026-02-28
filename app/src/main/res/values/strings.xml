@@ -85,5 +85,8 @@
     <string name="no_internet_message">Turn on internet to receive your weather alert.</string>
     <string name="no_internet_channel_name">No Internet Alerts</string>
     <string name="offline_banner_alert">You\'re offline. Alerts will notify you when connection is restored.</string>
-
+    <string name="no_favorites_title">No Favorites Yet</string>
+    <string name="no_favorites_subtitle">Add your favorite locations to see them here</string>
+    <string name="no_alerts_title">No Alerts Yet</string>
+    <string name="no_alerts_subtitle">Add an alert to get notified about the weather</string>
 </resources>

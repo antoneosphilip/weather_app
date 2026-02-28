@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.test.core.app.ApplicationProvider
 import com.example.weather_app.data.WeatherRepo
 import com.example.weather_app.data.favorite.model.LocationModel
+import com.example.weather_app.presentation.home.viewModel.FakeNetworkMonitor
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -33,6 +34,7 @@ class FavoriteViewModelTest {
     private lateinit var viewModel: FavoriteViewModel
     private lateinit var repo: WeatherRepo
     private lateinit var context: Context
+    private lateinit var networkMonitor: FakeNetworkMonitor
 
     @Before
     fun setup() {
@@ -41,8 +43,10 @@ class FavoriteViewModelTest {
         every { Log.i(any(), any()) } returns 0
         repo = mockk()
         context = mockk(relaxed = true)
+        networkMonitor=FakeNetworkMonitor(true)
+
         coEvery { repo.getLocation() } returns flowOf(emptyList())
-        viewModel = FavoriteViewModel(context = context, weatherRepo = repo)
+        viewModel = FavoriteViewModel(context = context, weatherRepo = repo,networkMonitor)
     }
 
 
