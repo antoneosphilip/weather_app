@@ -7,6 +7,7 @@
     <string name="inactive">غير نشط</string>
     <string name="delete_alert">حذف التنبيه</string>
     <string name="delete_alert_confirm">هل أنت متأكد من حذف هذا التنبيه؟</string>
+
     <string name="delete">حذف</string>
     <string name="cancel">إلغاء</string>
 
@@ -88,4 +89,11 @@
     <string name="no_alerts_title">لا توجد تنبيهات</string>
     <string name="no_alerts_subtitle">أضف تنبيهاً للحصول على إشعارات الطقس</string>
     <string name="search_location">ابحث عن مكان...</string>
+
+    <string name="permission_required_title">إذن الموقع مطلوب</string>
+    <string name="permission_required_settings_message">لقد رفضت الإذن بشكل دائم. يرجى تفعيله من الإعدادات.</string>
+    <string name="go_to_settings">الذهاب للإعدادات</string>
+    <string name="try_again">حاول مجدداً</string>
+    <string name="permission_required_toast">إذن الموقع مطلوب لاستخدام التطبيق</string>
+    <string name="splash_subtitle">رفيقك الشخصي للطقس</string>
 </resources>
