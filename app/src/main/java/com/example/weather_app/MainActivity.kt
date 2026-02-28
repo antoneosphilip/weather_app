@@ -1,25 +1,34 @@
 package com.example.weather_app
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import android.Manifest
 import androidx.core.app.ActivityCompat
 import android.content.pm.PackageManager
-
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.weather_app.presentation.setting.viewModel.LocaleHelper
 import com.example.weather_app.ui.theme.Weather_appTheme
 
 class MainActivity : ComponentActivity() {
+
+    override fun attachBaseContext(newBase: Context) {
+        val sharedPrefs = newBase.getSharedPreferences("settings", Context.MODE_PRIVATE)
+        val langCode = sharedPrefs.getString("language_code", "en") ?: "en"
+        val context = LocaleHelper.setLocale(newBase, langCode)
+        super.attachBaseContext(context)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -38,6 +47,7 @@ class MainActivity : ComponentActivity() {
                 1001
             )
         }
+
         enableEdgeToEdge()
         setContent {
             Weather_appTheme {
@@ -63,9 +73,7 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                 ) { innerPadding ->
-                    MyApp(
-                        nav = navController
-                    )
+                    MyApp(nav = navController)
                 }
             }
         }

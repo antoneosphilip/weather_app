@@ -34,6 +34,7 @@ class HomeViewModelTest{
     private lateinit var repo: WeatherRepo
     private lateinit var prefs: PreferenceStorage
     private lateinit var locationProvider: ILocationProvider
+    private lateinit var networkMonitor: FakeNetworkMonitor
     @OptIn(ExperimentalCoroutinesApi::class)
     @Before
     fun setup(){
@@ -42,12 +43,16 @@ class HomeViewModelTest{
         repo = mockk()
         prefs = FakePreferenceStorage()
         locationProvider = FakeLocationProvider()
+        networkMonitor=FakeNetworkMonitor(true)
         coEvery { repo.observeSettings() } returns flowOf(null)
-
+        coEvery { repo.insertWeather(any()) } returns Unit
+        coEvery { repo.insertHourlyForecast(any()) } returns Unit
+        coEvery { repo.insertDailyForecast(any()) } returns Unit
         viewModel = HomeViewModel(
             weatherRepo = repo,
             prefs = prefs,
-            locationProvider = locationProvider
+            locationProvider = locationProvider,
+            networkMonitor
         )
     }
 
@@ -69,6 +74,7 @@ class HomeViewModelTest{
 
         // When fetching all weather data
         viewModel.getAllWeatherData(lat, lon, lang, unit)
+
 
         // Then uiState should be Success with the correct data
         assertTrue(viewModel.uiState.value is HomeUiState.Success)

@@ -5,12 +5,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.work.BackoffPolicy
+import androidx.work.Constraints
+import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.weather_app.AlertWorker
+import com.example.weather_app.NoInternetAlertWorker
 
 import com.example.weather_app.data.WeatherRepo
 import com.example.weather_app.data.alert.model.AlertModel
+import com.example.weather_app.helper.NetworkMonitor
 import com.example.weather_app.presentation.alert.viewModel.AlertUiState
 
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,7 +28,7 @@ import java.util.UUID
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
 
-class AlertsViewModel(val context: Context,private val weatherRepo:WeatherRepo) : ViewModel() {
+class AlertsViewModel(val context: Context,private val weatherRepo:WeatherRepo,private val networkMonitor: NetworkMonitor) : ViewModel() {
 
     private val _showDialog = MutableStateFlow(false)
     val showDialog = _showDialog.asStateFlow()
@@ -40,8 +45,9 @@ class AlertsViewModel(val context: Context,private val weatherRepo:WeatherRepo) 
     private val _isActive = MutableStateFlow(false)
     val isActive = _isActive.asStateFlow()
 
-     var alertStates = mutableStateOf<AlertUiState>(AlertUiState.Loading)
-         private set
+    var alertStates = mutableStateOf<AlertUiState>(AlertUiState.Loading)
+        private set
+    val isConnected = networkMonitor.isConnected
 
 
     init {
@@ -75,9 +81,9 @@ class AlertsViewModel(val context: Context,private val weatherRepo:WeatherRepo) 
             }
         }
         else{
-          val workId=  scheduleAlert(startTimeMillis = alert.startTime, endTimeMillis = alert.endTime?:0L,
-              _selectedType.value=="Notification",alert.id.toLong()
-          )
+            val workId=  scheduleAlert(startTimeMillis = alert.startTime, endTimeMillis = alert.endTime?:0L,
+                _selectedType.value=="Notification",alert.id.toLong()
+            )
             viewModelScope.launch {
                 weatherRepo.saveAlert(
                     alert.copy(
@@ -101,9 +107,9 @@ class AlertsViewModel(val context: Context,private val weatherRepo:WeatherRepo) 
     fun saveAlert() {
         if (_startTime.value.isBlank() || _endTime.value.isBlank()) return
 
-        val format = SimpleDateFormat("h:mm a", Locale.getDefault())
-        val parsedStart = format.parse(_startTime.value) ?: return
-        val parsedEnd = format.parse(_endTime.value) ?: return
+        val format = SimpleDateFormat("h:mm a", Locale.ENGLISH)
+        val parsedStart = format.parse(normalizeTimeString(_startTime.value)) ?: return
+        val parsedEnd = format.parse(normalizeTimeString(_endTime.value)) ?: return
 
         val startCalParsed = Calendar.getInstance().apply { time = parsedStart }
         val endCalParsed = Calendar.getInstance().apply { time = parsedEnd }
@@ -123,7 +129,7 @@ class AlertsViewModel(val context: Context,private val weatherRepo:WeatherRepo) 
             set(Calendar.MINUTE, endCalParsed.get(Calendar.MINUTE))
             set(Calendar.SECOND, 0)
             set(Calendar.MILLISECOND, 0)
-                while (timeInMillis <= startCal.timeInMillis) {
+            while (timeInMillis <= startCal.timeInMillis) {
                 add(Calendar.DAY_OF_YEAR, 1)
             }
         }
@@ -135,7 +141,6 @@ class AlertsViewModel(val context: Context,private val weatherRepo:WeatherRepo) 
         Log.i("Alerts", "saveAlert end: $endMillis")
         Log.i("Alerts", "now: ${System.currentTimeMillis()}")
         Log.i("Alerts", "delay: ${startMillis - System.currentTimeMillis()}")
-
 
         viewModelScope.launch {
             val alertId = weatherRepo.saveAlert(
@@ -167,27 +172,50 @@ class AlertsViewModel(val context: Context,private val weatherRepo:WeatherRepo) 
                     workId = workId.toString()
                 )
             )
-}
+        }
         _showDialog.value = false
         _startTime.value = ""
         _endTime.value = ""
-
     }
-    private fun scheduleAlert(startTimeMillis: Long, endTimeMillis: Long, isNotification: Boolean,alertId: Long): UUID {
+
+    private fun normalizeTimeString(time: String): String {
+        return time
+            .replace('٠', '0').replace('١', '1').replace('٢', '2')
+            .replace('٣', '3').replace('٤', '4').replace('٥', '5')
+            .replace('٦', '6').replace('٧', '7').replace('٨', '8')
+            .replace('٩', '9')
+            .replace("ص", "AM")
+            .replace("م", "PM")
+    }
+
+    private fun scheduleAlert(startTimeMillis: Long, endTimeMillis: Long, isNotification: Boolean, alertId: Long): UUID {
         val delay = max(0, startTimeMillis - System.currentTimeMillis())
 
         val inputData = androidx.work.Data.Builder()
+            .putLong("START_TIME", startTimeMillis)
             .putLong("END_TIME", endTimeMillis)
             .putBoolean("IS_NOTIFICATION", isNotification)
-            .putLong("ALERT_ID",alertId)
+            .putLong("ALERT_ID", alertId)
+            .build()
+
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
 
         val request = OneTimeWorkRequestBuilder<AlertWorker>()
             .setInitialDelay(delay, TimeUnit.MILLISECONDS)
             .setInputData(inputData)
+            .setConstraints(constraints)
+            .setBackoffCriteria(BackoffPolicy.LINEAR, 10, TimeUnit.SECONDS)
+            .build()
+
+        val noInternetCheckRequest = OneTimeWorkRequestBuilder<NoInternetAlertWorker>()
+            .setInitialDelay(delay, TimeUnit.MILLISECONDS)
+            .setInputData(inputData)
             .build()
 
         WorkManager.getInstance(context).enqueue(request)
+        WorkManager.getInstance(context).enqueue(noInternetCheckRequest)
         return request.id
     }
 
@@ -212,10 +240,11 @@ class AlertsViewModel(val context: Context,private val weatherRepo:WeatherRepo) 
 }
 class AlertViewModelFactory(
     private val context: Context,
-    private val weatherRepo: WeatherRepo
+    private val weatherRepo: WeatherRepo,
+    private val networkMonitor: NetworkMonitor
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return AlertsViewModel(context,weatherRepo) as T
+        return AlertsViewModel(context,weatherRepo,networkMonitor) as T
 
     }
 }

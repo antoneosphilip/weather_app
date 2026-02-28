@@ -20,6 +20,8 @@ class FavoriteDetailsViewModel(val context: Context,val lat:Double,val long:Doub
     var favoriteStates = mutableStateOf<FavoriteDetailsUiState>(FavoriteDetailsUiState.Loading)
         private set
 
+    var windSpeedUnit = mutableStateOf("m/s")
+        private set
 
     val temp = mutableStateOf("")
 
@@ -35,6 +37,8 @@ class FavoriteDetailsViewModel(val context: Context,val lat:Double,val long:Doub
                 if (settings != null) {
                     getAllWeatherData(lat,long, settings.languageCode, settings.temperatureUnit)
                     temp.value = getUnit(settings.temperatureUnit)
+                    windSpeedUnit.value = getWindSpeedUnit(settings.windSpeedUnit)
+
                 }
             }
         }
@@ -65,6 +69,16 @@ class FavoriteDetailsViewModel(val context: Context,val lat:Double,val long:Doub
             }
 
         }
+    }
+    fun getWindSpeedUnit(unit: String): String {
+        return when (unit) {
+            "mile" -> "mph"
+            else -> "m/s"
+        }
+    }
+
+    fun convertWindSpeed(speedMs: Double, unit: String): Double {
+        return if (unit == "mile") speedMs * 2.237 else speedMs
     }
 }
 

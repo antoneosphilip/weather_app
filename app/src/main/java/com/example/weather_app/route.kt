@@ -13,15 +13,12 @@ import com.example.weather_app.data.favorite.model.LocationModel
 import com.example.weather_app.presentation.alert.view.AlertsScreen
 import com.example.weather_app.presentation.favorite.view.FavoritesScreen
 import com.example.weather_app.presentation.favorite.viewModel.FavoriteViewModel
-import com.example.weather_app.presentation.favorite.viewModel.FavoriteViewModelFactory
 import com.example.weather_app.presentation.favorite_details.view.FavoritesDetailsScreen
 import com.example.weather_app.presentation.home.view.HomeScreen
-import com.example.weather_app.presentation.home.view.LocationPickerScreen
+import com.example.weather_app.presentation.location.view.LocationPickerScreen
 import com.example.weather_app.presentation.home.viewModel.HomeViewModel
-import com.example.weather_app.presentation.home.viewModel.HomeViewModelFactory
 import com.example.weather_app.presentation.setting.view.SettingsScreen
 import com.example.weather_app.presentation.setting.viewModel.SettingViewModel
-import com.example.weather_app.presentation.setting.viewModel.SettingViewModelFactory
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.serialization.Serializable
 

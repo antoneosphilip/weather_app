@@ -33,11 +33,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.weather_app.R
 import com.example.weather_app.Screens
 import com.example.weather_app.data.WeatherRepo
 import com.example.weather_app.presentation.components.CustomLoading
@@ -75,6 +77,18 @@ fun FavoritesDetailsScreen(lat:Double,  long:Double,weatherRepo: WeatherRepo) {
                 CustomLoading()
             }
             is FavoriteDetailsUiState.Success -> {
+                val tempUnit = when (favoriteDetailsViewModel.temp.value) {
+                    "°C" -> stringResource(R.string.unit_celsius)
+                    "°F" -> stringResource(R.string.unit_fahrenheit)
+                    "K" -> stringResource(R.string.unit_kelvin)
+                    else -> favoriteDetailsViewModel.temp.value
+                }
+
+                val windUnit = when (favoriteDetailsViewModel.windSpeedUnit.value) {
+                    "m/s" -> stringResource(R.string.unit_ms)
+                    "mph" -> stringResource(R.string.unit_mph)
+                    else -> favoriteDetailsViewModel.windSpeedUnit.value
+                }
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -85,10 +99,11 @@ fun FavoritesDetailsScreen(lat:Double,  long:Double,weatherRepo: WeatherRepo) {
                         weather = state.currentWeather,
                         hourlyForecast = state.hourlyForecast,
                         dailyForecast = state.dailyForecast,
-                        temperatureUnit = favoriteDetailsViewModel.temp.value
-                    ) {
-
-                    }
+                        temperatureUnit = tempUnit,
+                        {
+                        },
+                        windSpeedUnit = windUnit
+                    )
                 }
             }
         }

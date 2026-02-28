@@ -24,7 +24,8 @@ fun WeatherComponent(
     hourlyForecast: WeatherForecastResponse,
     dailyForecast: DailyForecastResponse,
     temperatureUnit: String,
-    onLocationClick: () -> Unit
+    onLocationClick: () -> Unit,
+    windSpeedUnit:String
 ) {
 
     TopBar(cityName = weather.name)
@@ -52,16 +53,17 @@ fun WeatherComponent(
         humidity = weather.main.humidity,
         windSpeed = weather.wind.speed,
         pressure = weather.main.pressure,
-        clouds = weather.clouds.all
+        clouds = weather.clouds.all,
+        windSpeedUnit
     )
 
     Spacer(modifier = Modifier.height(24.dp))
 
-    HourlyForecast(hourlyForecast)
+    HourlyForecast(hourlyForecast,temperatureUnit)
 
     Spacer(modifier = Modifier.height(24.dp))
 
-    DailyForecast(dailyForecast)
+    DailyForecast(dailyForecast, unit = temperatureUnit)
 
     Spacer(modifier = Modifier.height(80.dp))
 }

@@ -10,6 +10,7 @@ sealed class HomeUiState {
     data class Success(
         val currentWeather: WeatherResponse,
         val hourlyForecast: WeatherForecastResponse,
-        val dailyForecast: DailyForecastResponse
+        val dailyForecast: DailyForecastResponse,
+        val isOffline: Boolean = false
     ) : HomeUiState()
 }

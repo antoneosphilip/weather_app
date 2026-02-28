@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -39,8 +40,9 @@ fun BottomNavigationBar(
                             restoreState = true
                         }
                     },
-                    icon = { Icon(imageVector = item.icon, contentDescription = item.title, modifier = Modifier.size(24.dp)) },
-                    label = { Text(text = item.title, fontSize = 12.sp) },
+                    icon = { Icon(imageVector = item.icon, contentDescription = stringResource(item.titleRes), modifier = Modifier.size(24.dp)) },
+                    label = { Text(text = stringResource(item.titleRes),
+                         fontSize = 12.sp) },
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = Color.White,
                         selectedTextColor = Color.White,

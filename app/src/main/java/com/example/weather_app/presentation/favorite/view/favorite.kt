@@ -17,34 +17,35 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.weather_app.LocationSource
+import com.example.weather_app.R
 import com.example.weather_app.Screens
 import com.example.weather_app.presentation.components.CustomLoading
 import com.example.weather_app.presentation.components.ErrorMessage
+import com.example.weather_app.presentation.components.OfflineBanner
 import com.example.weather_app.presentation.favorite.viewModel.FavoriteUiState
 import com.example.weather_app.presentation.favorite.viewModel.FavoriteViewModel
-import com.example.weather_app.presentation.favorite.viewModel.FavoriteViewModelFactory
 
 @Composable
-fun FavoritesScreen(nav: NavHostController,favoriteViewModel:FavoriteViewModel) {
-    val context= LocalContext.current
+fun FavoritesScreen(nav: NavHostController, favoriteViewModel: FavoriteViewModel) {
+    val isConnected by favoriteViewModel.isConnected.collectAsStateWithLifecycle(initialValue = true)
 
     Box(
         modifier = Modifier
@@ -52,33 +53,28 @@ fun FavoritesScreen(nav: NavHostController,favoriteViewModel:FavoriteViewModel) 
             .background(MaterialTheme.colorScheme.primary)
     ) {
         Column {
-            when(val state=favoriteViewModel.favoriteStates.value){
-                is FavoriteUiState.Error -> {
-                    ErrorMessage(error = state.message)
-                }
-
-                is FavoriteUiState.Loading -> {
-                    CustomLoading()
-                }
-
+            when (val state = favoriteViewModel.favoriteStates.value) {
+                is FavoriteUiState.Error -> ErrorMessage(error = state.message)
+                is FavoriteUiState.Loading -> CustomLoading()
                 is FavoriteUiState.Success -> {
-                    Column(
-                        modifier = Modifier
-                            .padding(top = 30.dp, start = 30.dp)
-                    ) {
+                    Column(modifier = Modifier.padding(top = 30.dp, start = 30.dp, end = 30.dp)) {
                         Text(
-                            text = "Favorites",
+                            text = stringResource(R.string.favorites),
                             fontSize = 24.sp,
                             color = Color.White,
                             fontWeight = FontWeight.Bold
                         )
-
+                        Spacer(modifier = Modifier.height(12.dp))
+                        if (!isConnected) {
+                            OfflineBanner(message = stringResource(R.string.offline_banner_favorite))
+                        }
                     }
                     Spacer(modifier = Modifier.height(20.dp))
-                    FavoriteList(favoriteList = state.favoriteList, nav = nav,favoriteViewModel)
+                    FavoriteList(favoriteList = state.favoriteList, nav = nav, favoriteViewModel, isConnected)
                 }
+                is FavoriteUiState.SaveSuccess -> print("save success")
+                FavoriteUiState.DeleteSuccess -> print("delete success")
             }
-
         }
 
         Box(
@@ -88,8 +84,8 @@ fun FavoritesScreen(nav: NavHostController,favoriteViewModel:FavoriteViewModel) 
                 .padding(bottom = 100.dp, end = 30.dp)
                 .size(50.dp)
                 .clip(CircleShape)
-                .background(Color.White)
-                .clickable {
+                .background(if (isConnected) Color.White else Color.Gray)
+                .clickable(enabled = isConnected) {
                     nav.navigate(Screens.LocationScreen(LocationSource.FAVORITE)) {
                         launchSingleTop = true
                     }
@@ -97,11 +93,10 @@ fun FavoritesScreen(nav: NavHostController,favoriteViewModel:FavoriteViewModel) 
         ) {
             Icon(
                 imageVector = Icons.Default.Favorite,
-                contentDescription = "favorite",
+                contentDescription = stringResource(R.string.favorites),
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(28.dp)
             )
         }
-
     }
-}
+    }

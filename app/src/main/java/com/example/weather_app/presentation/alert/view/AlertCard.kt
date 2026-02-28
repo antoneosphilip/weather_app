@@ -25,10 +25,12 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.weather_app.R
 import com.example.weather_app.data.alert.model.AlertModel
 import com.example.weather_app.ui.theme.Muted
 import com.example.weather_app.ui.theme.NavyBorder
@@ -171,7 +173,11 @@ fun AlertCard(
                             .padding(horizontal = 10.dp, vertical = 3.dp)
                     ) {
                         Text(
-                            text = alert.type,
+                            text = when (alert.type) {
+                                "Alarm" -> stringResource(R.string.alarm)
+                                "Notification" -> stringResource(R.string.notification)
+                                else -> alert.type
+                            },
                             fontSize = 10.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = accentColor
@@ -186,13 +192,13 @@ fun AlertCard(
                                 .background(accent.copy(alpha = dotAlpha))
                         )
                         Text(
-                            text = "Active",
+                            text = stringResource(R.string.active),
                             fontSize = 11.sp,
                             color = accent.copy(alpha = dotAlpha * 0.9f + 0.1f)
                         )
                     } else {
                         Text(
-                            text = "Inactive",
+                            text = stringResource(R.string.inactive),
                             fontSize = 11.sp,
                             color = Muted
                         )
@@ -223,7 +229,7 @@ fun AlertCard(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete",
+                        contentDescription = stringResource(R.string.delete),
                         tint = Muted,
                         modifier = Modifier.size(18.dp)
                     )
@@ -238,14 +244,14 @@ fun AlertCard(
             containerColor = primary,
             title = {
                 Text(
-                    text = "Delete Alert",
+                    text = stringResource(R.string.delete_alert),
                     color = Color.White,
                     fontWeight = FontWeight.Bold
                 )
             },
             text = {
                 Text(
-                    text = "Are you sure you want to delete this alert?",
+                    text = stringResource(R.string.delete_alert_confirm),
                     color = Color.White
                 )
             },
@@ -256,14 +262,14 @@ fun AlertCard(
                         showDialog = false
                     }
                 ) {
-                    Text("Delete", color = Color.White)
+                    Text(stringResource(R.string.delete), color = Color.White)
                 }
             },
             dismissButton = {
                 TextButton(
                     onClick = { showDialog = false }
                 ) {
-                    Text("Cancel", color = Color.White)
+                    Text(stringResource(R.string.cancel), color = Color.White)
                 }
             }
         )

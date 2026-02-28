@@ -9,21 +9,33 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.WifiOff
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import com.example.weather_app.LocationSource
+import com.example.weather_app.R
 import com.example.weather_app.Screens
 import com.example.weather_app.presentation.components.CustomLoading
 import com.example.weather_app.presentation.components.ErrorMessage
+import com.example.weather_app.presentation.components.OfflineBanner
 import com.example.weather_app.presentation.home.viewModel.HomeUiState
 import com.example.weather_app.presentation.home.viewModel.HomeViewModel
 
@@ -117,21 +129,38 @@ fun HomeScreen(
             )
 
             is HomeUiState.Success -> {
+                val tempUnit = when (viewModel.temp.value) {
+                    "°C" -> stringResource(R.string.unit_celsius)
+                    "°F" -> stringResource(R.string.unit_fahrenheit)
+                    "K" -> stringResource(R.string.unit_kelvin)
+                    else -> viewModel.temp.value
+                }
+                val windUnit = when (viewModel.windSpeedUnit.value ) {
+                    "mile" -> stringResource(R.string.unit_mph)
+                    else -> stringResource(R.string.unit_ms)
+                }
+
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(scrollState)
                         .padding(16.dp)
                 ) {
+                    if (state.isOffline) {
+                        OfflineBanner(message = stringResource(R.string.offline_banner_home))
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
+
                     WeatherComponent(
                         weather = state.currentWeather,
                         hourlyForecast = state.hourlyForecast,
                         dailyForecast = state.dailyForecast,
-                        temperatureUnit = viewModel.temp.value,
+                        temperatureUnit = tempUnit,
                         onLocationClick = {
                             navController.navigate(Screens.LocationScreen(LocationSource.HOME))
-                        }
-                    )
+                        },
+                        windUnit,
+                        )
                 }
             }
         }

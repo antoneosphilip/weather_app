@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -58,6 +59,7 @@ class AlertOverlayService : Service() {
     private lateinit var overlayView: View
     private val lifecycleOwner = MyServiceLifecycleOwner()
     private var ringtone: android.media.Ringtone? = null
+    private var mediaPlayer: MediaPlayer? = null
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -86,8 +88,6 @@ class AlertOverlayService : Service() {
         startForeground(1, notification)
     }
 
-    private var mediaPlayer: MediaPlayer? = null
-
     private fun playAlarmSound() {
         val alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
             ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
@@ -109,7 +109,14 @@ class AlertOverlayService : Service() {
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         lifecycleOwner.startLifecycle()
 
-        val composeView = ComposeView(this).apply {
+        val savedLang = getSharedPreferences("settings", MODE_PRIVATE)
+            .getString("language_code", "en") ?: "en"
+        val locale = java.util.Locale(savedLang)
+        val config = resources.configuration
+        config.setLocale(locale)
+        val localizedContext = createConfigurationContext(config)
+
+        val composeView = ComposeView(localizedContext).apply {
             setViewTreeLifecycleOwner(lifecycleOwner)
             setViewTreeSavedStateRegistryOwner(lifecycleOwner)
             setContent {
@@ -141,6 +148,9 @@ class AlertOverlayService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         ringtone?.stop()
+        mediaPlayer?.stop()
+        mediaPlayer?.release()
+        mediaPlayer = null
         lifecycleOwner.stopLifecycle()
         if (::overlayView.isInitialized) {
             windowManager.removeView(overlayView)
@@ -171,7 +181,7 @@ fun WeatherAlertDialog(message: String, onDismiss: () -> Unit, onCancel: () -> U
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "WEZY Weather Alert",
+                text = stringResource(R.string.notification_title),
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
                 color = Color.White,
@@ -193,14 +203,14 @@ fun WeatherAlertDialog(message: String, onDismiss: () -> Unit, onCancel: () -> U
                     onClick = onDismiss,
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF64B5F6))
                 ) {
-                    Text("DISMISS", color = Color.White)
+                    Text(stringResource(R.string.dismiss), color = Color.White)
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 Button(
                     onClick = onCancel,
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF64B5F6))
                 ) {
-                    Text("CANCEL", color = Color.White)
+                    Text(stringResource(R.string.cancel), color = Color.White)
                 }
             }
         }
