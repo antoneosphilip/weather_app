@@ -70,5 +70,11 @@
     <string name="nav_alerts">التنبيهات</string>
     <string name="nav_settings">الإعدادات</string>
     <string name="offline_banner">أنت غير متصل. يتم عرض بيانات محفوظة. اتصل للحصول على أحدث طقس.</string>
-
+    <string name="feels_like">يبدو كأنه: %1$s%2$s</string>
+    <string name="unit_celsius">°م</string>
+    <string name="unit_fahrenheit">°ف</string>
+    <string name="unit_kelvin">ك</string>
+    <string name="unit_ms">م/ث</string>
+    <string name="unit_mph">ميل/س</string>
+    <string name="unit_hpa">هكتوباسكال</string>
 </resources>

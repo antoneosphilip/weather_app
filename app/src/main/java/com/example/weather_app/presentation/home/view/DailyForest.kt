@@ -103,14 +103,14 @@
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = "${data.temp.max.roundToInt()}$unit",
-                         color = Color.White,
+                        text = "${formatNumber(data.temp.max.roundToInt(), context)}$unit",
+                        color = Color.White,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "${data.temp.max.roundToInt()}$unit",
+                        text = "${formatNumber(data.temp.min.roundToInt(), context)}$unit",
                         color = Color.White.copy(alpha = 0.5f),
                         fontSize = 14.sp
                     )

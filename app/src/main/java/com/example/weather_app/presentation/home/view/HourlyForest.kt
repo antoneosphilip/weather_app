@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -34,7 +35,7 @@ import kotlin.math.roundToInt
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun HourlyForecast(hourlyData: WeatherForecastResponse) {
+fun HourlyForecast(hourlyData: WeatherForecastResponse, unit: String) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = stringResource(R.string.hourly_forecast),
@@ -42,14 +43,10 @@ fun HourlyForecast(hourlyData: WeatherForecastResponse) {
             fontSize = 18.sp,
             fontWeight = FontWeight.SemiBold
         )
-
         Spacer(modifier = Modifier.height(12.dp))
-
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             items(hourlyData.list) { data ->
-                HourlyForecastCard(data)
+                HourlyForecastCard(data, unit)
             }
         }
     }
@@ -57,36 +54,29 @@ fun HourlyForecast(hourlyData: WeatherForecastResponse) {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun HourlyForecastCard(forecastItem: ForecastItem) {
+fun HourlyForecastCard(forecastItem: ForecastItem, unit: String) {
+    val context = LocalContext.current
     Card(
-        modifier = Modifier
-            .width(80.dp)
-            .height(120.dp),
+        modifier = Modifier.width(80.dp).height(120.dp),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondary
-        )
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondary)
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(12.dp),
+            modifier = Modifier.fillMaxSize().padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = formatToHour(forecastItem.dtTxt),
+                text = formatToHour(forecastItem.dtTxt, context),
                 color = Color.White.copy(alpha = 0.7f),
                 fontSize = 12.sp
             )
-
             WeatherIcon(
                 iconCode = forecastItem.weather.firstOrNull()?.icon ?: "",
                 modifier = Modifier.size(40.dp)
             )
-
             Text(
-                text = "${forecastItem.main.temp.roundToInt()}°C",
+                text = "${formatNumber(forecastItem.main.temp.roundToInt(), context)}$unit",
                 color = Color.White,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold

@@ -46,6 +46,8 @@ class HomeViewModel(
     var deniedCount = 0
     private var lastLocationSetting: String? = null
 
+    var windSpeedUnit = mutableStateOf("meter")
+        private set
     init {
         viewModelScope.launch {
             weatherRepo.observeSettings().collect {
@@ -62,13 +64,17 @@ class HomeViewModel(
                         }
                         lastLocationSetting = it.location
                         latLong?.let { ll ->
+                            windSpeedUnit.value = it.windSpeedUnit
+
                             getAllWeatherData(ll.latitude, ll.longitude, it.languageCode, it.temperatureUnit)
                             temp.value = getUnit(it.temperatureUnit)
+
                         }
                     }
                 }
             }
         }
+
 
         viewModelScope.launch {
             isConnected.collect { connected ->
@@ -240,6 +246,16 @@ class HomeViewModel(
                 }
             }
         }
+    }
+    fun getWindSpeedUnit(unit: String): String {
+        return when (unit) {
+            "mile" -> "mph"
+            else -> "m/s"
+        }
+    }
+
+    fun convertWindSpeed(speedMs: Double, unit: String): Double {
+        return if (unit == "mile") speedMs * 2.237 else speedMs
     }
 }
 

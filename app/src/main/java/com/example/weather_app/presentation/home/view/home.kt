@@ -128,6 +128,17 @@ fun HomeScreen(
             )
 
             is HomeUiState.Success -> {
+                val tempUnit = when (viewModel.temp.value) {
+                    "°C" -> stringResource(R.string.unit_celsius)
+                    "°F" -> stringResource(R.string.unit_fahrenheit)
+                    "K" -> stringResource(R.string.unit_kelvin)
+                    else -> viewModel.temp.value
+                }
+                val windUnit = when (viewModel.windSpeedUnit.value ) {
+                    "mile" -> stringResource(R.string.unit_mph)
+                    else -> stringResource(R.string.unit_ms)
+                }
+
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -164,11 +175,12 @@ fun HomeScreen(
                         weather = state.currentWeather,
                         hourlyForecast = state.hourlyForecast,
                         dailyForecast = state.dailyForecast,
-                        temperatureUnit = viewModel.temp.value,
+                        temperatureUnit = tempUnit,
                         onLocationClick = {
                             navController.navigate(Screens.LocationScreen(LocationSource.HOME))
-                        }
-                    )
+                        },
+                        windUnit,
+                        )
                 }
             }
         }
