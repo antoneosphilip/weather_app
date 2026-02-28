@@ -89,4 +89,6 @@
     <string name="no_favorites_subtitle">Add your favorite locations to see them here</string>
     <string name="no_alerts_title">No Alerts Yet</string>
     <string name="no_alerts_subtitle">Add an alert to get notified about the weather</string>
+    <string name="search_location">Search for a place...</string>
+
 </resources>

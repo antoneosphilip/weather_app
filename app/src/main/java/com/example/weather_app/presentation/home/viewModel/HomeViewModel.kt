@@ -1,6 +1,6 @@
 package com.example.weather_app.presentation.home.viewModel
 
-import LocationProvider
+import com.example.weather_app.data.location.datasource.LocationProvider
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -12,7 +12,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.weather_app.constant.Constants
 import com.example.weather_app.data.WeatherRepo
-import com.example.weather_app.data.location.ILocationProvider
+import com.example.weather_app.data.location.datasource.ILocationProvider
 import com.example.weather_app.helper.NetworkObserver
 import com.example.weather_app.prefs.PreferenceStorage
 import com.google.android.gms.maps.model.LatLng

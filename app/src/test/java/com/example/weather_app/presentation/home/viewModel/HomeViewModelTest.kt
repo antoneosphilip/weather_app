@@ -1,25 +1,19 @@
 package com.example.weather_app.presentation.home.viewModel
 
 import FakePreferenceStorage
-import android.content.Context
-import androidx.test.core.app.ApplicationProvider
 import com.example.weather_app.constant.Constants
 import com.example.weather_app.data.WeatherRepo
-import com.example.weather_app.data.location.ILocationProvider
+import com.example.weather_app.data.location.datasource.ILocationProvider
 import com.example.weather_app.data.weather.model.DailyForecastResponse
 import com.example.weather_app.data.weather.model.WeatherForecastResponse
 import com.example.weather_app.data.weather.model.WeatherResponse
 import com.example.weather_app.prefs.PreferenceStorage
 import io.mockk.coEvery
-import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.Assert.assertEquals

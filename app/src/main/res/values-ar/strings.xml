@@ -87,4 +87,5 @@
     <string name="no_favorites_subtitle">أضف مواقعك المفضلة لتظهر هنا</string>
     <string name="no_alerts_title">لا توجد تنبيهات</string>
     <string name="no_alerts_subtitle">أضف تنبيهاً للحصول على إشعارات الطقس</string>
+    <string name="search_location">ابحث عن مكان...</string>
 </resources>

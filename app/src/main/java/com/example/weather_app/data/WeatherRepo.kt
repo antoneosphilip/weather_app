@@ -5,6 +5,8 @@ import com.example.weather_app.data.alert.datasouce.AlertLocalDataBase
 import com.example.weather_app.data.alert.model.AlertModel
 import com.example.weather_app.data.favorite.datasource.FavoriteLocalDataBase
 import com.example.weather_app.data.favorite.model.LocationModel
+import com.example.weather_app.data.location.datasource.LocationRemoteDataSource
+import com.example.weather_app.data.location.model.GeoLocation
 import com.example.weather_app.data.setting.datasource.SettingLocalDataBase
 import com.example.weather_app.data.weather.datasource.local.WeatherLocalDataBase
 import com.example.weather_app.data.weather.datasource.remote.WeatherRemoteDataSource
@@ -20,7 +22,8 @@ class WeatherRepo(
     private val favoriteLocalDataBase: FavoriteLocalDataBase,
     private val alertLocalDataBase: AlertLocalDataBase,
     private val weatherRemoteData: WeatherRemoteDataSource,
-    private val settingLocalDataBase: SettingLocalDataBase
+    private val settingLocalDataBase: SettingLocalDataBase,
+    private val locationRemoteDataSource: LocationRemoteDataSource
 
 ) {
 
@@ -128,6 +131,9 @@ class WeatherRepo(
 
     suspend fun getCachedDailyForecast(): DailyForecastResponse? =
         weatherLocalData.getDailyForecast()
+    suspend fun searchLocations(query: String): List<GeoLocation> {
+        return locationRemoteDataSource.searchLocations(query)
+    }
 
 }
 

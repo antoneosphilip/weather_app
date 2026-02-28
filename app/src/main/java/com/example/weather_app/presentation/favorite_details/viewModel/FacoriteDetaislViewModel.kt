@@ -1,6 +1,5 @@
 package com.example.weather_app.presentation.favorite_details.viewModel
 
-import LocationProvider
 import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
@@ -9,8 +8,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.weather_app.constant.Constants
 import com.example.weather_app.data.WeatherRepo
-import com.google.android.gms.maps.model.LatLng
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 class FavoriteDetailsViewModel(val context: Context,val lat:Double,val long:Double,private val weatherRepo: WeatherRepo ) : ViewModel() {
