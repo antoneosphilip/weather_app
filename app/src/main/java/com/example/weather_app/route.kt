@@ -19,31 +19,39 @@ import com.example.weather_app.presentation.location.view.LocationPickerScreen
 import com.example.weather_app.presentation.home.viewModel.HomeViewModel
 import com.example.weather_app.presentation.setting.view.SettingsScreen
 import com.example.weather_app.presentation.setting.viewModel.SettingViewModel
+import com.example.weather_app.presentation.splash.view.SplashScreen
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.serialization.Serializable
 
-sealed class Screens{
+sealed class Screens {
 
     @Serializable
-    object HomeScreen :Screens()
+    object SplashScreen : Screens()
+
     @Serializable
-    object AlertScreen :Screens()
+    object HomeScreen : Screens()
+
     @Serializable
-    object FavoriteScreen :Screens()
+    object AlertScreen : Screens()
+
     @Serializable
-    object SettingScreen :Screens()
+    object FavoriteScreen : Screens()
+
+    @Serializable
+    object SettingScreen : Screens()
 
     @Serializable
     data class LocationScreen(
         val locationSource: LocationSource
-    ) :Screens()
+    ) : Screens()
 
     @Serializable
     data class FavoriteDetails(
-        val lat:Double,
-        val long:Double
+        val lat: Double,
+        val long: Double
     ) : Screens()
 }
+
 enum class LocationSource {
     HOME,
     FAVORITE
@@ -51,7 +59,7 @@ enum class LocationSource {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun MyApp(nav: NavHostController,) {
+fun MyApp(nav: NavHostController) {
     val context = LocalContext.current
     val appContainer = (context.applicationContext as MyApplication).appContainer
 
@@ -67,35 +75,41 @@ fun MyApp(nav: NavHostController,) {
         factory = appContainer.favoriteViewModelFactory
     )
 
-
     NavHost(
         nav,
-       // modifier = Modifier,
-        startDestination = Screens.HomeScreen
+        startDestination = Screens.SplashScreen
     ) {
 
-        composable<Screens.HomeScreen> {
-            HomeScreen(nav,homeViewModel)
+        composable<Screens.SplashScreen> {
+            SplashScreen(onSplashFinished = {
+                nav.navigate(Screens.HomeScreen) {
+                    popUpTo(Screens.SplashScreen) { inclusive = true }
+                }
+            })
         }
+
+        composable<Screens.HomeScreen> {
+            HomeScreen(nav, homeViewModel)
+        }
+
         composable<Screens.AlertScreen> {
             AlertsScreen(nav)
-
         }
-        composable<Screens.SettingScreen> {b->
+
+        composable<Screens.SettingScreen> {
             SettingsScreen(settingViewModel)
-
-        }
-        composable<Screens.FavoriteScreen> {b->
-            FavoritesScreen(nav,favoriteViewModel)
         }
 
+        composable<Screens.FavoriteScreen> {
+            FavoritesScreen(nav, favoriteViewModel)
+        }
 
         composable<Screens.FavoriteDetails> { b ->
             val args = b.toRoute<Screens.FavoriteDetails>()
-            FavoritesDetailsScreen(args.lat, args.long,appContainer.weatherRepo)
+            FavoritesDetailsScreen(args.lat, args.long, appContainer.weatherRepo)
         }
-        composable<Screens.LocationScreen> { backStackEntry ->
 
+        composable<Screens.LocationScreen> { backStackEntry ->
             val args = backStackEntry.toRoute<Screens.LocationScreen>()
             val source = args.locationSource
 
@@ -105,11 +119,9 @@ fun MyApp(nav: NavHostController,) {
                 },
                 onLocationSelected = { lat, lng, address ->
                     when (source) {
-
                         LocationSource.HOME -> {
                             homeViewModel.getAllWeatherData(lat, lng)
                         }
-
                         LocationSource.FAVORITE -> {
                             favoriteViewModel.saveLocation(
                                 LocationModel(

@@ -1,3 +1,5 @@
+package com.example.weather_app.data.location.datasource
+
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
@@ -7,7 +9,6 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import androidx.core.app.ActivityCompat
-import com.example.weather_app.data.location.ILocationProvider
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
@@ -73,4 +74,5 @@ class LocationProvider(private val context: Context): ILocationProvider {
             null
         }
     }
+
 }

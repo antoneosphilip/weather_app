@@ -7,9 +7,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
-import android.Manifest
-import androidx.core.app.ActivityCompat
-import android.content.pm.PackageManager
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -28,26 +25,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED ||
-            ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ),
-                1001
-            )
-        }
-
         enableEdgeToEdge()
         setContent {
             Weather_appTheme {
@@ -55,22 +32,25 @@ class MainActivity : ComponentActivity() {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = navBackStackEntry?.destination?.route
 
+                val isSplash = currentDestination == Screens.SplashScreen::class.qualifiedName
+
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     bottomBar = {
-                        val selectedScreen = when {
-                            currentDestination == Screens.HomeScreen::class.qualifiedName -> Screens.HomeScreen
-                            currentDestination == Screens.FavoriteScreen::class.qualifiedName -> Screens.FavoriteScreen
-                            currentDestination?.startsWith(Screens.FavoriteDetails::class.qualifiedName ?: "") == true -> Screens.FavoriteScreen
-                            currentDestination == Screens.AlertScreen::class.qualifiedName -> Screens.AlertScreen
-                            currentDestination == Screens.SettingScreen::class.qualifiedName -> Screens.SettingScreen
-                            else -> Screens.HomeScreen
+                        if (!isSplash) {
+                            val selectedScreen = when {
+                                currentDestination == Screens.HomeScreen::class.qualifiedName -> Screens.HomeScreen
+                                currentDestination == Screens.FavoriteScreen::class.qualifiedName -> Screens.FavoriteScreen
+                                currentDestination?.startsWith(Screens.FavoriteDetails::class.qualifiedName ?: "") == true -> Screens.FavoriteScreen
+                                currentDestination == Screens.AlertScreen::class.qualifiedName -> Screens.AlertScreen
+                                currentDestination == Screens.SettingScreen::class.qualifiedName -> Screens.SettingScreen
+                                else -> Screens.HomeScreen
+                            }
+                            BottomNavigationBar(
+                                navController = navController,
+                                currentDestination = selectedScreen
+                            )
                         }
-
-                        BottomNavigationBar(
-                            navController = navController,
-                            currentDestination = selectedScreen
-                        )
                     }
                 ) { innerPadding ->
                     MyApp(nav = navController)

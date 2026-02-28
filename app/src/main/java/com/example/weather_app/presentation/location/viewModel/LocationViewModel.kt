@@ -1,68 +1,40 @@
 package com.example.weather_app.presentation.location.viewModel
 
-import android.content.Context
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.weather_app.data.WeatherRepo
-import com.example.weather_app.data.favorite.model.LocationModel
-import com.example.weather_app.constant.Constants
-import com.google.android.gms.maps.model.LatLng
-import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.supervisorScope
 
-class LocationPickerViewModel(
-    private val weatherRepo: WeatherRepo
-) : ViewModel() {
 
-    private val _savedState = MutableStateFlow<SavedState>(SavedState.Idle)
-    val savedState = _savedState.asStateFlow()
+class LocationPickerViewModel(private val weatherRepo: WeatherRepo) : ViewModel() {
 
-    fun selectHomeLocation(lat: Double, lon: Double) {
+    var state = mutableStateOf<LocationPickerState>(LocationPickerState.Idle)
+        private set
+
+    fun onLocationSelected(lat: Double, lon: Double, address: String) {
+        state.value = LocationPickerState.LocationSelected(lat, lon, address)
+    }
+
+    fun searchLocations(query: String) {
+        if (query.length < 2) {
+            state.value = LocationPickerState.Idle
+            return
+        }
         viewModelScope.launch {
-            _savedState.value = SavedState.Loading
+            state.value = LocationPickerState.Loading
             try {
-                val setting = weatherRepo.getSetting()
-                val language = setting?.languageCode ?: "en"
-                val unit = setting?.temperatureUnit ?: "metric"
-                supervisorScope {
-                    val weatherDeferred = async { weatherRepo.getWeather(lat, lon, Constants.apiKey, language, unit) }
-                    val hourlyDeferred = async { weatherRepo.getHourlyForecast(lat, lon, Constants.apiKey, language, unit) }
-                    val dailyDeferred = async { weatherRepo.getDailyForecast(lat, lon, Constants.apiKey, language, unit) }
-                    weatherDeferred.await()
-                    hourlyDeferred.await()
-                    dailyDeferred.await()
-                }
-                _savedState.value = SavedState.HomeSuccess(lat, lon)
+                val results = weatherRepo.searchLocations(query)
+                state.value = LocationPickerState.SearchResults(results)
             } catch (e: Exception) {
-                _savedState.value = SavedState.Error(e.message ?: "Unknown error")
+                state.value = LocationPickerState.Error(e.message ?: "Unknown error")
             }
         }
     }
 
-    fun saveFavoriteLocation(lat: Double, lon: Double, address: String) {
-        viewModelScope.launch {
-            _savedState.value = SavedState.Loading
-            try {
-                weatherRepo.saveLocation(
-                    LocationModel(lat = lat, long = lon, location = address)
-                )
-                _savedState.value = SavedState.FavoriteSuccess
-            } catch (e: Exception) {
-                _savedState.value = SavedState.Error(e.message ?: "Unknown error")
-            }
-        }
-    }
-
-    sealed class SavedState {
-        object Idle : SavedState()
-        object Loading : SavedState()
-        object FavoriteSuccess : SavedState()
-        data class HomeSuccess(val lat: Double, val lon: Double) : SavedState()
-        data class Error(val message: String) : SavedState()
+    fun clearSearch() {
+        state.value = LocationPickerState.Idle
     }
 }
 

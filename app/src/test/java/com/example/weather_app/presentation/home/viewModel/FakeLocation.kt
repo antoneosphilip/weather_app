@@ -2,7 +2,7 @@ package com.example.weather_app.presentation.home.viewModel
 
 import android.app.Activity
 import android.content.BroadcastReceiver
-import com.example.weather_app.data.location.ILocationProvider
+import com.example.weather_app.data.location.datasource.ILocationProvider
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.maps.model.LatLng
 

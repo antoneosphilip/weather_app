@@ -1,4 +1,4 @@
-package com.example.weather_app.data.location
+package com.example.weather_app.data.location.datasource
 
 import android.content.BroadcastReceiver
 import com.google.android.gms.common.api.ResolvableApiException

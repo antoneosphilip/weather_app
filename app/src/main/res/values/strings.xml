@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Weather App</string>
+    <string name="app_name">Skyla</string>
 
     <string name="my_alerts">My Alerts</string>
     <string name="active_alerts">%d active alerts</string>
@@ -89,4 +89,12 @@
     <string name="no_favorites_subtitle">Add your favorite locations to see them here</string>
     <string name="no_alerts_title">No Alerts Yet</string>
     <string name="no_alerts_subtitle">Add an alert to get notified about the weather</string>
+    <string name="search_location">Search for a place...</string>
+    <string name="permission_required_title">Location Required</string>
+    <string name="permission_required_settings_message">You have denied the permission permanently. Please enable it from Settings.</string>
+    <string name="go_to_settings">Go to Settings</string>
+    <string name="try_again">Try Again</string>
+    <string name="permission_required_toast">Location permission is required to use the app</string>
+    <string name="splash_subtitle">Your personal weather companion</string>
+
 </resources>
