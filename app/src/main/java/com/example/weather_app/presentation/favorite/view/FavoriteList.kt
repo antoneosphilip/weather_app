@@ -10,14 +10,15 @@ import com.example.weather_app.data.favorite.model.LocationModel
 import com.example.weather_app.presentation.favorite.viewModel.FavoriteViewModel
 
 @Composable
-fun FavoriteList(favoriteList:List<LocationModel>,nav:NavController,favoriteViewModel:FavoriteViewModel){
+fun FavoriteList(favoriteList:List<LocationModel>,nav:NavController,favoriteViewModel:FavoriteViewModel, isConnected: Boolean
+){
 
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
 
          items(favoriteList){
-                 locationModel-> FavoriteItem(locationModel=locationModel, nav = nav,favoriteViewModel)
+                 locationModel-> FavoriteItem(locationModel=locationModel, nav = nav,favoriteViewModel,isConnected)
          }
 
     }

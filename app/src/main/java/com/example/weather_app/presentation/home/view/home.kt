@@ -35,6 +35,7 @@ import com.example.weather_app.R
 import com.example.weather_app.Screens
 import com.example.weather_app.presentation.components.CustomLoading
 import com.example.weather_app.presentation.components.ErrorMessage
+import com.example.weather_app.presentation.components.OfflineBanner
 import com.example.weather_app.presentation.home.viewModel.HomeUiState
 import com.example.weather_app.presentation.home.viewModel.HomeViewModel
 
@@ -146,28 +147,7 @@ fun HomeScreen(
                         .padding(16.dp)
                 ) {
                     if (state.isOffline) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(Color(0xFFFF6B35))
-                                .padding(horizontal = 16.dp, vertical = 10.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.WifiOff,
-                                contentDescription = null,
-                                tint = Color.White,
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Text(
-                                text = stringResource(R.string.offline_banner),
-                                color = Color.White,
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
+                        OfflineBanner(message = stringResource(R.string.offline_banner_home))
                         Spacer(modifier = Modifier.height(12.dp))
                     }
 

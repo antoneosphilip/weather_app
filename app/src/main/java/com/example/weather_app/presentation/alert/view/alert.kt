@@ -36,6 +36,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.weather_app.MyApplication
@@ -44,6 +45,7 @@ import com.example.weather_app.data.alert.model.AlertModel
 import com.example.weather_app.presentation.alert.viewModel.AlertUiState
 import com.example.weather_app.presentation.components.CustomLoading
 import com.example.weather_app.presentation.components.ErrorMessage
+import com.example.weather_app.presentation.components.OfflineBanner
 import com.example.weather_app.ui.theme.accent
 import com.example.weather_app.ui.theme.primary
 
@@ -59,6 +61,8 @@ fun AlertsScreen(nav: NavHostController) {
     val startTime by viewModel.startTime.collectAsState()
     val endTime by viewModel.endTime.collectAsState()
     val selectedType by viewModel.selectedType.collectAsState()
+
+    val isConnected by viewModel.isConnected.collectAsStateWithLifecycle(initialValue = true)
 
     Box(
         modifier = Modifier
@@ -81,6 +85,9 @@ fun AlertsScreen(nav: NavHostController) {
                 Column(
                     modifier = Modifier.padding(30.dp)
                 ) {
+                    if (!isConnected) {
+                        OfflineBanner(message = stringResource(R.string.offline_banner_alert))
+                    }
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,

@@ -77,4 +77,11 @@
     <string name="unit_ms">م/ث</string>
     <string name="unit_mph">ميل/س</string>
     <string name="unit_hpa">هكتوباسكال</string>
+    <string name="offline_banner_home">أنت غير متصل. يتم عرض بيانات محفوظة. اتصل للحصول على أحدث طقس.</string>
+    <string name="offline_banner_favorite">أنت غير متصل. اتصل بالإنترنت لإضافة أو عرض المفضلة.</string>
+    <string name="no_internet_title">⚠️ تنبيه طقس معلق</string>
+    <string name="no_internet_message">افتح الإنترنت لاستقبال تنبيه الطقس.</string>
+    <string name="no_internet_channel_name">تنبيهات بدون إنترنت</string>
+    <string name="offline_banner_alert">أنت غير متصل. سيتم إرسال تنبيهات الطقس عند عودة الاتصال.</string>
+
 </resources>

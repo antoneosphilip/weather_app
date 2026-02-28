@@ -19,50 +19,33 @@ import java.util.Locale
 class AlertWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
-        val endTime = inputData.getLong("END_TIME", 0)
+        val startTime = inputData.getLong("START_TIME", 0)
         val isNotification = inputData.getBoolean("IS_NOTIFICATION", false)
-        val now = System.currentTimeMillis()
         val alertId = inputData.getLong("ALERT_ID", -1L)
         val weatherRepo = (applicationContext as MyApplication).appContainer.weatherRepo
+        val now = System.currentTimeMillis()
 
-        Log.i("AlertWorker", "doWork fired! isNotification=$isNotification")
-
-        if (now <= endTime) {
-            val lat = SharedPreferencesHelper.getInstance(applicationContext).getString("lat", "0.0")
-            val lon = SharedPreferencesHelper.getInstance(applicationContext).getString("lon", "0.0")
-
-            return try {
-                val weatherResponse = weatherRepo.getWeather(
-                    lat.toDouble(),
-                    lon.toDouble(),
-                    Constants.apiKey
-                )
-
-                val message = getWeatherAlertMessage(getLocalizedContext(), weatherResponse.weather[0].id)
-
-                if (isNotification) {
-                    showNotification(message)
-                } else {
-                    showAlarm(message)
-                }
-
-                Log.i("succccc", "s: " + weatherResponse.weather[0].id)
-                Log.i("succccc", "s: " + alertId)
-
-                if (alertId != -1L) {
-                    Log.i("deleteee", "doWork: ")
-                    weatherRepo.deleteAlert(alertId.toInt())
-                }
-                Result.success()
-
-            } catch (e: Exception) {
-                e.printStackTrace()
-                Log.i("errorrr", "error: ")
-                Result.retry()
-            }
+        if (now < startTime) {
+            return Result.success()
         }
 
-        return Result.success()
+        val lat = SharedPreferencesHelper.getInstance(applicationContext).getString("lat", "0.0")
+        val lon = SharedPreferencesHelper.getInstance(applicationContext).getString("lon", "0.0")
+
+        return try {
+            val weatherResponse = weatherRepo.getWeather(
+                lat.toDouble(),
+                lon.toDouble(),
+                Constants.apiKey
+            )
+            val message = getWeatherAlertMessage(getLocalizedContext(), weatherResponse.weather[0].id)
+            if (isNotification) showNotification(message) else showAlarm(message)
+            if (alertId != -1L) weatherRepo.deleteAlert(alertId.toInt())
+            Result.success()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Result.retry()
+        }
     }
 
     private fun getLocalizedContext(): Context {

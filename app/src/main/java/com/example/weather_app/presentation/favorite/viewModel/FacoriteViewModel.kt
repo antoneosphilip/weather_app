@@ -10,15 +10,18 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.weather_app.constant.Constants
 import com.example.weather_app.data.WeatherRepo
 import com.example.weather_app.data.favorite.model.LocationModel
+import com.example.weather_app.helper.NetworkObserver
 import com.example.weather_app.presentation.home.viewModel.HomeUiState
 import com.example.weather_app.presentation.home.viewModel.HomeViewModel
 import com.example.weather_app.presentation.setting.viewModel.SettingViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
-class FavoriteViewModel(val context: Context,private val weatherRepo: WeatherRepo) :ViewModel(){
+class FavoriteViewModel(val context: Context,private val weatherRepo: WeatherRepo,private val networkMonitor: NetworkObserver) :ViewModel(){
      var favoriteStates= mutableStateOf<FavoriteUiState>(FavoriteUiState.Loading)
         private set
+
+    val isConnected = networkMonitor.isConnected
 
     init {
         getLocation()
@@ -66,10 +69,11 @@ class FavoriteViewModel(val context: Context,private val weatherRepo: WeatherRep
 }
 class FavoriteViewModelFactory(
     private val context: Context,
-    private val weatherRepo: WeatherRepo
+    private val weatherRepo: WeatherRepo,
+    private val networkMonitor: NetworkObserver
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return FavoriteViewModel(context,weatherRepo) as T
+        return FavoriteViewModel(context,weatherRepo,networkMonitor) as T
 
     }
 }

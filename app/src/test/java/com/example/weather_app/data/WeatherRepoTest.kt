@@ -5,6 +5,7 @@ import com.example.weather_app.data.alert.datasouce.AlertLocalDataBase
 import com.example.weather_app.data.alert.model.AlertModel
 import com.example.weather_app.data.favorite.datasource.FavoriteLocalDataBase
 import com.example.weather_app.data.favorite.model.LocationModel
+import com.example.weather_app.data.setting.datasource.SettingLocalDataBase
 import com.example.weather_app.data.weather.datasource.local.WeatherLocalDataBase
 import com.example.weather_app.data.weather.datasource.remote.WeatherRemoteDataSource
 import com.example.weather_app.data.weather.model.WeatherResponse
@@ -34,6 +35,7 @@ class WeatherRepoTest{
     private lateinit var favoriteLocalDataBase: FavoriteLocalDataBase
     private lateinit var weatherLocalData: WeatherLocalDataBase
     private lateinit var alertLocalDataBase: AlertLocalDataBase
+    private lateinit var settingLocalDataBase: SettingLocalDataBase
 
     private lateinit var weatherRepo: WeatherRepo
 
@@ -43,12 +45,13 @@ class WeatherRepoTest{
         favoriteLocalDataBase = mockk()
         weatherLocalData = mockk()
         alertLocalDataBase = mockk()
-
+        settingLocalDataBase= mockk()
         weatherRepo = WeatherRepo(
             weatherLocalData,
             favoriteLocalDataBase,
             alertLocalDataBase,
-            weatherRemoteData
+            weatherRemoteData,
+            settingLocalDataBase
         )
     }
     @Test

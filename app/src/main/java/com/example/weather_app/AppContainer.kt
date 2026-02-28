@@ -110,11 +110,12 @@ class AppContainerImpl(
     }
 
     override val favoriteViewModelFactory by lazy {
-        FavoriteViewModelFactory(context, weatherRepo)
+        FavoriteViewModelFactory(context, weatherRepo,networkMonitor
+        )
     }
 
     override val alertViewModelFactory by lazy {
-        AlertViewModelFactory(context, weatherRepo)
+        AlertViewModelFactory(context, weatherRepo,networkMonitor)
     }
     override val settingViewModelFactory by lazy {
         SettingViewModelFactory(context, weatherRepo)

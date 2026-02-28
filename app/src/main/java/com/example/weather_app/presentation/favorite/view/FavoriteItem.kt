@@ -41,7 +41,8 @@ import com.example.weather_app.ui.theme.primary
 fun FavoriteItem(
     locationModel: LocationModel,
     nav: NavController,
-    viewModel: FavoriteViewModel
+    viewModel: FavoriteViewModel,
+    isConnected: Boolean
 ) {
     var showDialog by remember { mutableStateOf(false) }
 
@@ -56,6 +57,7 @@ fun FavoriteItem(
                 shape = RoundedCornerShape(50.dp)
             )
             .combinedClickable(
+                enabled = isConnected,
                 onClick = {
                     nav.navigate(
                         Screens.FavoriteDetails(
