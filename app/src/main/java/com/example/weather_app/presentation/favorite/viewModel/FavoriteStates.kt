@@ -14,4 +14,11 @@ sealed class FavoriteUiState {
         val favoriteList: List<LocationModel>,
 
     ) : FavoriteUiState()
+
+    data class SaveSuccess(
+        val favoriteModel: LocationModel,
+
+        ) : FavoriteUiState()
+    data object DeleteSuccess : FavoriteUiState()
 }
+

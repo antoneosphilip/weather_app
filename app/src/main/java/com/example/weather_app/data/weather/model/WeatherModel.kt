@@ -1,8 +1,10 @@
 package com.example.weather_app.data.weather.model
 
+import androidx.room.Entity
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+@Entity(tableName = "weather")
 @Serializable
 data class WeatherResponse(
     val coord: Coord,

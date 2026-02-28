@@ -5,6 +5,7 @@ import com.example.weather_app.data.alert.datasouce.AlertLocalDataBase
 import com.example.weather_app.data.alert.model.AlertModel
 import com.example.weather_app.data.favorite.datasource.FavoriteLocalDataBase
 import com.example.weather_app.data.favorite.model.LocationModel
+import com.example.weather_app.data.setting.datasource.SettingLocalDataBase
 import com.example.weather_app.data.weather.datasource.local.WeatherLocalDataBase
 import com.example.weather_app.data.weather.datasource.remote.WeatherRemoteDataSource
 import com.example.weather_app.data.weather.model.DailyForecastResponse
@@ -18,7 +19,9 @@ class WeatherRepo(
     private val weatherLocalData: WeatherLocalDataBase,
     private val favoriteLocalDataBase: FavoriteLocalDataBase,
     private val alertLocalDataBase: AlertLocalDataBase,
-    private val weatherRemoteData: WeatherRemoteDataSource
+    private val weatherRemoteData: WeatherRemoteDataSource,
+    private val settingLocalDataBase: SettingLocalDataBase
+
 ) {
 
     suspend fun getWeather(
@@ -74,14 +77,14 @@ class WeatherRepo(
     }
 
     suspend fun insertSetting(setting: SettingModel) {
-        weatherLocalData.insertSetting(setting)
+        settingLocalDataBase.insertSetting(setting)
     }
 
     suspend fun getSetting():SettingModel? {
-      return  weatherLocalData.getSetting()
+      return  settingLocalDataBase.getSetting()
     }
 
-     fun observeSettings(): Flow<SettingModel?> = weatherLocalData.observeSettings()
+     fun observeSettings(): Flow<SettingModel?> = settingLocalDataBase.observeSettings()
 
     suspend fun saveLocation(locationModel: LocationModel){
         favoriteLocalDataBase.saveLocation(locationModel)
@@ -108,6 +111,23 @@ class WeatherRepo(
     {
          alertLocalDataBase.deleteAlert(alertId)
     }
+    suspend fun insertWeather(weather: WeatherResponse) =
+        weatherLocalData.insertWeather(weather)
+
+    suspend fun insertHourlyForecast(hourly: WeatherForecastResponse) =
+        weatherLocalData.insertHourlyForecast(hourly)
+
+    suspend fun insertDailyForecast(daily: DailyForecastResponse) =
+        weatherLocalData.insertDailyForecast(daily)
+
+    suspend fun getCachedWeather(): WeatherResponse? =
+        weatherLocalData.getWeather()
+
+    suspend fun getCachedHourlyForecast(): WeatherForecastResponse? =
+        weatherLocalData.getHourlyForecast()
+
+    suspend fun getCachedDailyForecast(): DailyForecastResponse? =
+        weatherLocalData.getDailyForecast()
 
 }
 

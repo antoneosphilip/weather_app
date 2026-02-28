@@ -3,15 +3,20 @@ package com.example.weather_app
 import AlertViewModelFactory
 import LocationProvider
 import android.content.Context
+import android.net.Network
 import com.example.weather_app.data.WeatherRepo
 import com.example.weather_app.data.alert.datasouce.AlertDao
 import com.example.weather_app.data.alert.datasouce.AlertLocalDataBase
 import com.example.weather_app.data.favorite.datasource.FavoriteDao
 import com.example.weather_app.data.favorite.datasource.FavoriteLocalDataBase
 import com.example.weather_app.data.location.ILocationProvider
+import com.example.weather_app.data.setting.datasource.SettingDao
+import com.example.weather_app.data.setting.datasource.SettingLocalDataBase
 import com.example.weather_app.data.weather.datasource.local.WeatherLocalDataBase
 import com.example.weather_app.data.weather.datasource.remote.WeatherRemoteDataSource
 import com.example.weather_app.db.DataBase
+import com.example.weather_app.helper.NetworkMonitor
+import com.example.weather_app.helper.NetworkObserver
 import com.example.weather_app.prefs.PreferenceStorage
 import com.example.weather_app.prefs.SharedPreferencesHelper
 import com.example.weather_app.presentation.favorite.viewModel.FavoriteViewModelFactory
@@ -46,6 +51,13 @@ interface AppContainer {
 
     val prefs: PreferenceStorage
 
+    val networkMonitor: NetworkObserver
+
+    val settingDao: SettingDao
+
+    val settingLocalDataBase: SettingLocalDataBase
+
+
 }
 class AppContainerImpl(
     private val context: Context
@@ -57,6 +69,9 @@ class AppContainerImpl(
     override val favoriteDao by lazy {
         DataBase.getInstance(context).getFavoriteDao()
     }
+    override val settingDao by lazy {
+        DataBase.getInstance(context).getSettingDao()
+    }
 
 
     override val alertLocalDataBase by lazy {
@@ -65,6 +80,11 @@ class AppContainerImpl(
 
     override val favoriteLocalDataBase by lazy {
         FavoriteLocalDataBase(favoriteDao)
+    }
+
+
+    override val settingLocalDataBase by lazy {
+        SettingLocalDataBase(context)
     }
 
     override val weatherLocalDataBase by lazy {
@@ -81,11 +101,12 @@ class AppContainerImpl(
             weatherLocalData = weatherLocalDataBase,
             favoriteLocalDataBase = favoriteLocalDataBase,
             alertLocalDataBase = alertLocalDataBase,
-            weatherRemoteData = weatherRemoteDataSource
+            weatherRemoteData = weatherRemoteDataSource,
+            settingLocalDataBase
         )
     }
     override val homeViewModelFactory by lazy {
-        HomeViewModelFactory(weatherRepo, prefs,locationProvider)
+        HomeViewModelFactory(weatherRepo, prefs,locationProvider,networkMonitor)
     }
 
     override val favoriteViewModelFactory by lazy {
@@ -101,5 +122,7 @@ class AppContainerImpl(
     override val locationProvider by lazy {
         LocationProvider(context)
     }
+    override val networkMonitor = NetworkMonitor(context)
+
 
 }

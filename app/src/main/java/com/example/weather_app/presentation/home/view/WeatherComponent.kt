@@ -61,7 +61,7 @@ fun WeatherComponent(
 
     Spacer(modifier = Modifier.height(24.dp))
 
-    DailyForecast(dailyForecast)
+    DailyForecast(dailyForecast, unit = temperatureUnit)
 
     Spacer(modifier = Modifier.height(80.dp))
 }

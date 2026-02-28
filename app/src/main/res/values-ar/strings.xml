@@ -69,4 +69,6 @@
     <string name="nav_favorites">المفضلة</string>
     <string name="nav_alerts">التنبيهات</string>
     <string name="nav_settings">الإعدادات</string>
+    <string name="offline_banner">أنت غير متصل. يتم عرض بيانات محفوظة. اتصل للحصول على أحدث طقس.</string>
+
 </resources>

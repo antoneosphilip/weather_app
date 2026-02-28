@@ -71,4 +71,6 @@
     <string name="nav_favorites">Favorites</string>
     <string name="nav_alerts">Alerts</string>
     <string name="nav_settings">Settings</string>
+    <string name="offline_banner">You\'re offline. Showing cached data. Connect for latest weather.</string>
+
 </resources>

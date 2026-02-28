@@ -1,14 +1,22 @@
 package com.example.weather_app.presentation.home.view
 
+import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @RequiresApi(Build.VERSION_CODES.O)
-fun formatToDate(timestamp: Long): String {
-    val instant = java.time.Instant.ofEpochSecond(timestamp)
-    val date = java.time.LocalDateTime.ofInstant(instant, java.time.ZoneId.systemDefault())
-    val dayOfWeek = date.dayOfWeek.toString().substring(0, 3).replaceFirstChar { it.uppercase() }
-    val month = date.month.toString().substring(0, 3).replaceFirstChar { it.uppercase() }
-    val day = date.dayOfMonth
-    return "$dayOfWeek, $month $day"
+fun formatToDate(timestamp: Long, context: Context): String {
+    val savedLang = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+        .getString("language_code", "en") ?: "en"
+    val locale = if (savedLang == "ar") Locale("ar") else Locale.ENGLISH
+
+    val instant = Instant.ofEpochSecond(timestamp)
+    val date = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
+    val formatter = DateTimeFormatter.ofPattern("EEE, MMM d", locale)
+    return date.format(formatter)
 }

@@ -18,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -42,6 +43,27 @@ fun NewAlertDialog(
     onCancel: () -> Unit,
     onSave: () -> Unit
 ) {
+    val now = Calendar.getInstance()
+    val currentHour = now.get(Calendar.HOUR_OF_DAY)
+    val currentMinute = now.get(Calendar.MINUTE)
+
+    val startHour: Int
+    val startMinute: Int
+    if (startTime.isNotEmpty()) {
+        val parts = startTime.split(":", " ")
+        val isPm = startTime.contains("PM")
+        var h = parts[0].toIntOrNull() ?: currentHour
+        val m = parts[1].toIntOrNull() ?: currentMinute
+        if (isPm && h != 12) h += 12
+        if (!isPm && h == 12) h = 0
+        startHour = h
+        startMinute = m
+    } else {
+        startHour = currentHour
+        startMinute = currentMinute
+    }
+
+    val isSaveEnabled = startTime.isNotEmpty() && endTime.isNotEmpty()
 
     Column(
         modifier = Modifier
@@ -67,18 +89,22 @@ fun NewAlertDialog(
         TimePickerField(
             label = if (startTime.isEmpty()) stringResource(R.string.start_time) else startTime,
             onClick = {
-                val cal = Calendar.getInstance()
-                TimePickerDialog(
+                val dialog = TimePickerDialog(
                     context,
                     { _, hour, minute ->
-                        val amPm = if (hour < 12) "AM" else "PM"
-                        val h = if (hour % 12 == 0) 12 else hour % 12
-                        onStartTimeChange(String.format("%d:%02d %s", h, minute, amPm))
+                        val isAfterNow = hour > currentHour ||
+                                (hour == currentHour && minute >= currentMinute)
+                        if (isAfterNow) {
+                            val amPm = if (hour < 12) "AM" else "PM"
+                            val h = if (hour % 12 == 0) 12 else hour % 12
+                            onStartTimeChange(String.format("%d:%02d %s", h, minute, amPm))
+                        }
                     },
-                    cal.get(Calendar.HOUR_OF_DAY),
-                    cal.get(Calendar.MINUTE),
+                    currentHour,
+                    currentMinute,
                     false
-                ).show()
+                )
+                dialog.show()
             }
         )
 
@@ -87,18 +113,22 @@ fun NewAlertDialog(
         TimePickerField(
             label = if (endTime.isEmpty()) stringResource(R.string.end_time) else endTime,
             onClick = {
-                val cal = Calendar.getInstance()
-                TimePickerDialog(
+                val dialog = TimePickerDialog(
                     context,
                     { _, hour, minute ->
-                        val amPm = if (hour < 12) "AM" else "PM"
-                        val h = if (hour % 12 == 0) 12 else hour % 12
-                        onEndTimeChange(String.format("%d:%02d %s", h, minute, amPm))
+                        val isAfterStart = hour > startHour ||
+                                (hour == startHour && minute > startMinute)
+                        if (isAfterStart) {
+                            val amPm = if (hour < 12) "AM" else "PM"
+                            val h = if (hour % 12 == 0) 12 else hour % 12
+                            onEndTimeChange(String.format("%d:%02d %s", h, minute, amPm))
+                        }
                     },
-                    cal.get(Calendar.HOUR_OF_DAY),
-                    cal.get(Calendar.MINUTE),
+                    startHour,
+                    startMinute,
                     false
-                ).show()
+                )
+                dialog.show()
             }
         )
 
@@ -147,13 +177,17 @@ fun NewAlertDialog(
 
             Button(
                 onClick = onSave,
+                enabled = isSaveEnabled,
                 modifier = Modifier.weight(1f),
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = accent)
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = accent,
+                    disabledContainerColor = Color.Gray
+                )
             ) {
                 Text(
                     text = stringResource(R.string.save),
-                    color = primary,
+                    color = if (isSaveEnabled) primary else Color.White.copy(alpha = 0.5f),
                     fontWeight = FontWeight.Bold
                 )
             }

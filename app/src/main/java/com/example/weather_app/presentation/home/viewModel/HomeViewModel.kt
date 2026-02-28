@@ -13,23 +13,24 @@ import androidx.lifecycle.viewModelScope
 import com.example.weather_app.constant.Constants
 import com.example.weather_app.data.WeatherRepo
 import com.example.weather_app.data.location.ILocationProvider
+import com.example.weather_app.helper.NetworkObserver
 import com.example.weather_app.prefs.PreferenceStorage
-import com.example.weather_app.prefs.SharedPreferencesHelper
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
-import kotlin.math.log
 
 class HomeViewModel(
     private val weatherRepo: WeatherRepo,
     private val prefs: PreferenceStorage,
-     val locationProvider: ILocationProvider
+    val locationProvider: ILocationProvider,
+    private val networkMonitor: NetworkObserver
 ) : ViewModel() {
 
+    val isConnected = networkMonitor.isConnected
 
     var uiState = mutableStateOf<HomeUiState>(HomeUiState.Loading)
         private set
@@ -42,9 +43,7 @@ class HomeViewModel(
 
     val shouldCloseMap = mutableStateOf(false)
     val temp = mutableStateOf("")
-
     var deniedCount = 0
-
     private var lastLocationSetting: String? = null
 
     init {
@@ -55,22 +54,33 @@ class HomeViewModel(
                         lastLocationSetting = it.location
                         shouldNavigateToMap.value = true
                         shouldCloseMap.value = false
-
                     } else {
-                        Log.i("gpsssssss", ": ss")
-
-//                        if (it.location != "Manual") {
-//                        }
-                        if(it.location=="GPS") {
+                        if (it.location == "GPS") {
                             shouldCloseMap.value = true
                             shouldNavigateToMap.value = false
                             getCurrentLocation()
-
                         }
                         lastLocationSetting = it.location
                         latLong?.let { ll ->
                             getAllWeatherData(ll.latitude, ll.longitude, it.languageCode, it.temperatureUnit)
                             temp.value = getUnit(it.temperatureUnit)
+                        }
+                    }
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            isConnected.collect { connected ->
+                if (connected) {
+                    val currentState = uiState.value
+                    if (currentState is HomeUiState.Success && currentState.isOffline) {
+                        latLong?.let { ll ->
+                            val setting = weatherRepo.getSetting()
+                            val language = setting?.languageCode ?: "en"
+                            val unit = setting?.temperatureUnit ?: "metric"
+                            getAllWeatherData(ll.latitude, ll.longitude, language, unit)
+                            temp.value = getUnit(unit)
                         }
                     }
                 }
@@ -150,25 +160,18 @@ class HomeViewModel(
         }
     }
 
-   suspend fun getCurrentLocation(){
-
+    suspend fun getCurrentLocation() {
         latLong = locationProvider.getLocation()
-
-       Log.i("lattttlongng", "getCurrentLocation: "+ (latLong?.latitude ?: 0))
-        if(latLong == null){
-            val lat = prefs
-                .getString("lat")
-                ?.toDoubleOrNull()
-
-            val lon = prefs
-                .getString("lon")
-                ?.toDoubleOrNull()
-
+        Log.i("lattttlongng", "getCurrentLocation: " + (latLong?.latitude ?: 0))
+        if (latLong == null) {
+            val lat = prefs.getString("lat")?.toDoubleOrNull()
+            val lon = prefs.getString("lon")?.toDoubleOrNull()
             if (lat != null && lon != null) {
                 latLong = LatLng(lat, lon)
             }
         }
     }
+
     fun requestLocationCheck() {
         if (uiState.value is HomeUiState.Success) return
         if (latLong != null) return
@@ -199,40 +202,57 @@ class HomeViewModel(
     }
 
     fun getAllWeatherData(lat: Double, lon: Double, lan: String = "en", unit: String = "metric") {
-        uiState.value = HomeUiState.Loading
         viewModelScope.launch {
-            try {
-                supervisorScope {
-                    val weatherDeferred = async { weatherRepo.getWeather(lat, lon, Constants.apiKey, lan, unit) }
-                    val hourlyDeferred = async { weatherRepo.getHourlyForecast(lat, lon, Constants.apiKey, lan, unit) }
-                    val dailyDeferred = async { weatherRepo.getDailyForecast(lat, lon, Constants.apiKey, lan, unit) }
+            val connected = isConnected.first()
 
-                    val weather = weatherDeferred.await()
-                    val hourly = hourlyDeferred.await()
-                    val daily = dailyDeferred.await()
+            if (connected) {
+                uiState.value = HomeUiState.Loading
+                try {
+                    supervisorScope {
+                        val weatherDeferred = async { weatherRepo.getWeather(lat, lon, Constants.apiKey, lan, unit) }
+                        val hourlyDeferred = async { weatherRepo.getHourlyForecast(lat, lon, Constants.apiKey, lan, unit) }
+                        val dailyDeferred = async { weatherRepo.getDailyForecast(lat, lon, Constants.apiKey, lan, unit) }
 
-                    uiState.value = HomeUiState.Success(weather, hourly, daily)
+                        val weather = weatherDeferred.await()
+                        val hourly = hourlyDeferred.await()
+                        val daily = dailyDeferred.await()
 
-                    latLong = LatLng(
-                        weather.coord.lat,
-                        weather.coord.lon
-                    )
+                        weatherRepo.insertWeather(weather)
+                        weatherRepo.insertHourlyForecast(hourly)
+                        weatherRepo.insertDailyForecast(daily)
+
+                        uiState.value = HomeUiState.Success(weather, hourly, daily, isOffline = false)
+                        latLong = LatLng(weather.coord.lat, weather.coord.lon)
+                    }
+                } catch (e: Exception) {
+                    uiState.value = HomeUiState.Error(e.message ?: "Unknown error")
                 }
-            } catch (e: Exception) {
-                uiState.value = HomeUiState.Error(e.message ?: "Unknown error")
+            } else {
+                val weather = weatherRepo.getCachedWeather()
+                val hourly = weatherRepo.getCachedHourlyForecast()
+                val daily = weatherRepo.getCachedDailyForecast()
+
+                if (weather != null && hourly != null && daily != null) {
+                    uiState.value = HomeUiState.Success(weather, hourly, daily, isOffline = true)
+                    latLong = LatLng(weather.coord.lat, weather.coord.lon)
+                } else {
+                    uiState.value = HomeUiState.Error("No internet connection")
+                }
             }
         }
-    }}
+    }
+}
 
 class HomeViewModelFactory(
     private val weatherRepo: WeatherRepo,
     private val prefs: PreferenceStorage,
-    private val locationProvider: LocationProvider
+    private val locationProvider: LocationProvider,
+    private val networkMonitor: NetworkObserver
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(HomeViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return HomeViewModel( weatherRepo,prefs,locationProvider) as T
+            return HomeViewModel(weatherRepo, prefs, locationProvider, networkMonitor) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

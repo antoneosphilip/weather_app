@@ -14,6 +14,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.example.weather_app.constant.Constants
 import com.example.weather_app.prefs.SharedPreferencesHelper
+import java.util.Locale
 
 class AlertWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
 
@@ -37,7 +38,7 @@ class AlertWorker(context: Context, params: WorkerParameters) : CoroutineWorker(
                     Constants.apiKey
                 )
 
-                val message = getWeatherAlertMessage(applicationContext, weatherResponse.weather[0].id)
+                val message = getWeatherAlertMessage(getLocalizedContext(), weatherResponse.weather[0].id)
 
                 if (isNotification) {
                     showNotification(message)
@@ -64,18 +65,29 @@ class AlertWorker(context: Context, params: WorkerParameters) : CoroutineWorker(
         return Result.success()
     }
 
+    private fun getLocalizedContext(): Context {
+        val savedLang = applicationContext
+            .getSharedPreferences("settings", Context.MODE_PRIVATE)
+            .getString("language_code", "en") ?: "en"
+        val localeCode = if (savedLang == "Arabic" || savedLang == "ar") "ar" else "en"
+        val locale = Locale(localeCode)
+        val config = applicationContext.resources.configuration
+        config.setLocale(locale)
+        return applicationContext.createConfigurationContext(config)
+    }
+
     private fun getWeatherAlertMessage(context: Context, weatherId: Int): String {
         return when (weatherId) {
             in 200..232 -> context.getString(R.string.weather_alert_thunderstorm)
             in 300..321 -> context.getString(R.string.weather_alert_drizzle)
             in 500..504 -> context.getString(R.string.weather_alert_rain)
-            511        -> context.getString(R.string.weather_alert_freezing_rain)
+            511         -> context.getString(R.string.weather_alert_freezing_rain)
             in 520..531 -> context.getString(R.string.weather_alert_heavy_shower)
             in 600..622 -> context.getString(R.string.weather_alert_snow)
             in 700..781 -> context.getString(R.string.weather_alert_low_visibility)
-            800        -> context.getString(R.string.weather_alert_clear)
+            800         -> context.getString(R.string.weather_alert_clear)
             in 801..804 -> context.getString(R.string.weather_alert_cloudy)
-            else       -> context.getString(R.string.weather_alert_default)
+            else        -> context.getString(R.string.weather_alert_default)
         }
     }
 
@@ -91,6 +103,7 @@ class AlertWorker(context: Context, params: WorkerParameters) : CoroutineWorker(
     }
 
     private fun showNotification(message: String) {
+        val ctx = getLocalizedContext()
         val channelId = "alert_notification_channel"
         val notificationManager =
             applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -98,7 +111,7 @@ class AlertWorker(context: Context, params: WorkerParameters) : CoroutineWorker(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 channelId,
-                applicationContext.getString(R.string.notification_channel_name),
+                ctx.getString(R.string.notification_channel_name),
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 setSound(
@@ -119,13 +132,13 @@ class AlertWorker(context: Context, params: WorkerParameters) : CoroutineWorker(
         )
 
         val notification = NotificationCompat.Builder(applicationContext, channelId)
-            .setContentTitle(applicationContext.getString(R.string.notification_title))
+            .setContentTitle(ctx.getString(R.string.notification_title))
             .setContentText(message)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setAutoCancel(true)
-            .addAction(0, applicationContext.getString(R.string.dismiss), dismissPending)
+            .addAction(0, ctx.getString(R.string.dismiss), dismissPending)
             .build()
 
         notificationManager.notify(1001, notification)

@@ -72,6 +72,14 @@ fun FavoritesScreen(nav: NavHostController, favoriteViewModel: FavoriteViewModel
                     Spacer(modifier = Modifier.height(20.dp))
                     FavoriteList(favoriteList = state.favoriteList, nav = nav, favoriteViewModel)
                 }
+
+                is FavoriteUiState.SaveSuccess -> {
+                    print("save success")
+                }
+
+                FavoriteUiState.DeleteSuccess -> {
+                    print("delete success")
+                }
             }
         }
 

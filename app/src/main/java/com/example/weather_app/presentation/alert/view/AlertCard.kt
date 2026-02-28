@@ -173,7 +173,11 @@ fun AlertCard(
                             .padding(horizontal = 10.dp, vertical = 3.dp)
                     ) {
                         Text(
-                            text = alert.type,
+                            text = when (alert.type) {
+                                "Alarm" -> stringResource(R.string.alarm)
+                                "Notification" -> stringResource(R.string.notification)
+                                else -> alert.type
+                            },
                             fontSize = 10.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = accentColor

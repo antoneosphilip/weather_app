@@ -1,4 +1,4 @@
-package com.example.weather_app.presentation.home.view
+package com.example.weather_app.presentation.location.view
 
 import android.location.Geocoder
 import androidx.compose.foundation.layout.*
