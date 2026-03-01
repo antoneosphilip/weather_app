@@ -52,7 +52,7 @@ class AlertDaoTest {
         // when inserting into db
         val result = alertDao.saveAlert(alert)
 
-        // then get result
+        // then result should be not em
         Assert.assertTrue(result > 0)
     }
     @Test

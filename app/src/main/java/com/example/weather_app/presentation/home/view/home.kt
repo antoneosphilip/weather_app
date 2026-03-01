@@ -11,21 +11,19 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.WifiOff
-import androidx.compose.material3.Icon
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -38,7 +36,9 @@ import com.example.weather_app.presentation.components.ErrorMessage
 import com.example.weather_app.presentation.components.OfflineBanner
 import com.example.weather_app.presentation.home.viewModel.HomeUiState
 import com.example.weather_app.presentation.home.viewModel.HomeViewModel
+import com.example.weather_app.ui.theme.primary
 
+@OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun HomeScreen(
@@ -48,6 +48,9 @@ fun HomeScreen(
     val scrollState = rememberScrollState()
     val context = LocalContext.current
     val activity = context as Activity
+
+    val pullToRefreshState = rememberPullToRefreshState()
+    var isRefreshing by remember { mutableStateOf(false) }
 
     val locationSettingsLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartIntentSenderForResult()
@@ -115,6 +118,12 @@ fun HomeScreen(
             }
     }
 
+    LaunchedEffect(viewModel.uiState.value) {
+        if (viewModel.uiState.value !is HomeUiState.Loading) {
+            isRefreshing = false
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -135,32 +144,55 @@ fun HomeScreen(
                     "K" -> stringResource(R.string.unit_kelvin)
                     else -> viewModel.temp.value
                 }
-                val windUnit = when (viewModel.windSpeedUnit.value ) {
+                val windUnit = when (viewModel.windSpeedUnit.value) {
                     "mile" -> stringResource(R.string.unit_mph)
                     else -> stringResource(R.string.unit_ms)
                 }
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(scrollState)
-                        .padding(16.dp)
-                ) {
-                    if (state.isOffline) {
-                        OfflineBanner(message = stringResource(R.string.offline_banner_home))
-                        Spacer(modifier = Modifier.height(12.dp))
-                    }
-
-                    WeatherComponent(
-                        weather = state.currentWeather,
-                        hourlyForecast = state.hourlyForecast,
-                        dailyForecast = state.dailyForecast,
-                        temperatureUnit = tempUnit,
-                        onLocationClick = {
-                            navController.navigate(Screens.LocationScreen(LocationSource.HOME))
-                        },
-                        windUnit,
+                PullToRefreshBox(
+                    state = pullToRefreshState,
+                    isRefreshing = isRefreshing,
+                    onRefresh = {
+                        isRefreshing = true
+                        viewModel.latLong?.let {
+                            viewModel.getAllWeatherData(it.latitude, it.longitude)
+                        } ?: run {
+                            viewModel.retryLocation(context)
+                        }
+                    },
+                    modifier = Modifier.fillMaxSize(),
+                    indicator = {
+                        PullToRefreshDefaults.Indicator(
+                            state = pullToRefreshState,
+                            isRefreshing = isRefreshing,
+                            modifier = Modifier.align(Alignment.TopCenter),
+                            containerColor = Color.White,
+                            color = primary,
                         )
+                    }
+                ){
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(scrollState)
+                            .padding(16.dp)
+                    ) {
+                        if (state.isOffline) {
+                            OfflineBanner(message = stringResource(R.string.offline_banner_home))
+                            Spacer(modifier = Modifier.height(12.dp))
+                        }
+
+                        WeatherComponent(
+                            weather = state.currentWeather,
+                            hourlyForecast = state.hourlyForecast,
+                            dailyForecast = state.dailyForecast,
+                            temperatureUnit = tempUnit,
+                            onLocationClick = {
+                                navController.navigate(Screens.LocationScreen(LocationSource.HOME))
+                            },
+                            windUnit,
+                        )
+                    }
                 }
             }
         }
