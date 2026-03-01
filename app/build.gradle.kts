@@ -98,4 +98,5 @@ dependencies {
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
     implementation("androidx.compose.material:material-icons-extended")
     implementation ("com.airbnb.android:lottie-compose:6.4.0")
+    implementation ("androidx.compose.material3:material3:1.3.0")
 }

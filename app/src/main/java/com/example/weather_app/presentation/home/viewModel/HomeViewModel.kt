@@ -95,6 +95,46 @@ class HomeViewModel(
         }
     }
 
+    fun getAllWeatherData(lat: Double, lon: Double, lan: String = "en", unit: String = "metric") {
+        viewModelScope.launch {
+            val connected = isConnected.first()
+
+            if (connected) {
+                uiState.value = HomeUiState.Loading
+                try {
+                    supervisorScope {
+                        val weatherDeferred = async { weatherRepo.getWeather(lat, lon, Constants.apiKey, lan, unit) }
+                        val hourlyDeferred = async { weatherRepo.getHourlyForecast(lat, lon, Constants.apiKey, lan, unit) }
+                        val dailyDeferred = async { weatherRepo.getDailyForecast(lat, lon, Constants.apiKey, lan, unit) }
+
+                        val weather = weatherDeferred.await()
+                        val hourly = hourlyDeferred.await()
+                        val daily = dailyDeferred.await()
+
+                        weatherRepo.insertWeather(weather)
+                        weatherRepo.insertHourlyForecast(hourly)
+                        weatherRepo.insertDailyForecast(daily)
+
+                        uiState.value = HomeUiState.Success(weather, hourly, daily, isOffline = false)
+                        latLong = LatLng(weather.coord.lat, weather.coord.lon)
+                    }
+                } catch (e: Exception) {
+                    uiState.value = HomeUiState.Error(e.message ?: "Unknown error")
+                }
+            } else {
+                val weather = weatherRepo.getCachedWeather()
+                val hourly = weatherRepo.getCachedHourlyForecast()
+                val daily = weatherRepo.getCachedDailyForecast()
+
+                if (weather != null && hourly != null && daily != null) {
+                    uiState.value = HomeUiState.Success(weather, hourly, daily, isOffline = true)
+                    latLong = LatLng(weather.coord.lat, weather.coord.lon)
+                } else {
+                    uiState.value = HomeUiState.Error("No internet connection")
+                }
+            }
+        }
+    }
     fun retryLocation(context: Context) {
         viewModelScope.launch {
             if (latLong == null) {
@@ -208,46 +248,7 @@ class HomeViewModel(
         }
     }
 
-    fun getAllWeatherData(lat: Double, lon: Double, lan: String = "en", unit: String = "metric") {
-        viewModelScope.launch {
-            val connected = isConnected.first()
 
-            if (connected) {
-                uiState.value = HomeUiState.Loading
-                try {
-                    supervisorScope {
-                        val weatherDeferred = async { weatherRepo.getWeather(lat, lon, Constants.apiKey, lan, unit) }
-                        val hourlyDeferred = async { weatherRepo.getHourlyForecast(lat, lon, Constants.apiKey, lan, unit) }
-                        val dailyDeferred = async { weatherRepo.getDailyForecast(lat, lon, Constants.apiKey, lan, unit) }
-
-                        val weather = weatherDeferred.await()
-                        val hourly = hourlyDeferred.await()
-                        val daily = dailyDeferred.await()
-
-                        weatherRepo.insertWeather(weather)
-                        weatherRepo.insertHourlyForecast(hourly)
-                        weatherRepo.insertDailyForecast(daily)
-
-                        uiState.value = HomeUiState.Success(weather, hourly, daily, isOffline = false)
-                        latLong = LatLng(weather.coord.lat, weather.coord.lon)
-                    }
-                } catch (e: Exception) {
-                    uiState.value = HomeUiState.Error(e.message ?: "Unknown error")
-                }
-            } else {
-                val weather = weatherRepo.getCachedWeather()
-                val hourly = weatherRepo.getCachedHourlyForecast()
-                val daily = weatherRepo.getCachedDailyForecast()
-
-                if (weather != null && hourly != null && daily != null) {
-                    uiState.value = HomeUiState.Success(weather, hourly, daily, isOffline = true)
-                    latLong = LatLng(weather.coord.lat, weather.coord.lon)
-                } else {
-                    uiState.value = HomeUiState.Error("No internet connection")
-                }
-            }
-        }
-    }
     fun getWindSpeedUnit(unit: String): String {
         return when (unit) {
             "mile" -> "mph"

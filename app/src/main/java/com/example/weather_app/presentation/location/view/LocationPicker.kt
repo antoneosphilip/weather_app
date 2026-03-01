@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -18,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.GpsFixed
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
@@ -80,6 +82,7 @@ fun LocationPickerScreen(
     val locationPickerViewModel: LocationPickerViewModel = viewModel(
         factory = appContainer.locationViewModelFactory
     )
+
     var selectedPosition by remember {
         mutableStateOf(currentLocation ?: LatLng(30.0444, 31.2357))
     }
@@ -148,22 +151,6 @@ fun LocationPickerScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = primary)
             )
-        },
-        floatingActionButton = {
-            currentLocation?.let { location ->
-                FloatingActionButton(
-                    onClick = {
-                        selectedPosition = location
-                        cameraPositionState.position = CameraPosition.fromLatLngZoom(location, 12f)
-                    },
-                    containerColor = primary
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.LocationOn,
-                        contentDescription = stringResource(R.string.my_location)
-                    )
-                }
-            }
         }
     ) { padding ->
         Box(
@@ -283,6 +270,63 @@ fun LocationPickerScreen(
                             HorizontalDivider(color = Color.LightGray.copy(alpha = 0.5f))
                         }
                     }
+                }
+            }
+
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .navigationBarsPadding()
+                    .padding(end = 16.dp, bottom = 16.dp),
+                horizontalAlignment = Alignment.End
+            ) {
+                currentLocation?.let { location ->
+                    FloatingActionButton(
+                        onClick = {
+                            selectedPosition = location
+                            cameraPositionState.position = CameraPosition.fromLatLngZoom(location, 15f)
+                        },
+                        containerColor = primary,
+                        modifier = Modifier.padding(bottom = 12.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.GpsFixed,
+                            contentDescription = stringResource(R.string.my_location),
+                            tint = Color.White
+                        )
+                    }
+                }
+
+                FloatingActionButton(
+                    onClick = {
+                        val geocoder = Geocoder(context, Locale.getDefault())
+                        var address = ""
+                        try {
+                            val results = geocoder.getFromLocation(
+                                selectedPosition.latitude,
+                                selectedPosition.longitude,
+                                1
+                            )
+                            if (!results.isNullOrEmpty()) {
+                                address = results[0].getAddressLine(0) ?: ""
+                            }
+                        } catch (e: Exception) {
+                            address = ""
+                        }
+                        onLocationSelected(
+                            selectedPosition.latitude,
+                            selectedPosition.longitude,
+                            address
+                        )
+                        onBack()
+                    },
+                    containerColor = primary
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = stringResource(R.string.confirm),
+                        tint = Color.White
+                    )
                 }
             }
         }
